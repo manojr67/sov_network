@@ -201,7 +201,7 @@
     }
 
     // EXPLORER ENGINE
-    const gun = Gun(['https://gun-manhattan.herokuapp.com/gun']);
+    const gun = Gun(['https://gun-manhattan.herokuapp.com/gun']);Gun(['https://sov-relay.onrender.com/gun']);
     gun.get('sov_v70_wallets').map().on((data, key) => {
         if(!data) return;
         const list = document.getElementById('explorer-list');

@@ -149,7 +149,7 @@ const IdentityEngine = {
     async init(pin) {
         try {
             //
-            window.gun = Gun({ peers: ['https://gun-manhattan.herokuapp.com/gun', 'https://peer.wall.org/gun'], radisk: true, localStorage: true });
+            window.gun = Gun({ peers: ['https://sov-relay.onrender.com/gun', 'https://gun-manhattan.herokuapp.com/gun', 'https://peer.wall.org/gun'], radisk: true, localStorage: true });
             sessionPIN = pin;
             const enc = localStorage.getItem('sov_vault_enc');
             if(enc) userKeys = JSON.parse(CryptoJS.AES.decrypt(enc, pin).toString(CryptoJS.enc.Utf8));
