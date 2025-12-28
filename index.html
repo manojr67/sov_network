@@ -1,96 +1,24 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://unpkg.com 'unsafe-inline'; style-src 'self' https://cdn.jsdelivr.net https://fonts.googleapis.com https://unpkg.com 'unsafe-inline'; font-src 'self' https://fonts.gstatic.com https://cdn.jsdelivr.net; connect-src 'self' https://gun-manhattan.herokuapp.com/gun https://sov-relay.onrender.com/gun; img-src 'self' data: https://*.basemaps.cartocdn.com;">
-
-    <title>SOV Ultimate | Sovereign Lattice Network</title>
-    
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;500;700;800&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
-    
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/gun/gun.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/gun/sea.js"></script>
-    
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
-    <style>
-        :root {
-            --primary: #f7931a; --navy: #020617;
-            --text: #f8fafc; --text-muted: #94a3b8; --border: rgba(255,255,255,0.1);
-            --card-bg: rgba(15, 23, 42, 0.7); --success: #10b981; --danger: #ef4444;
-        }
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Plus Jakarta Sans', sans-serif; color: var(--text); background: var(--navy); overflow-x: hidden; user-select: none; }
-        .bg-glow { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(circle at 80% 20%, rgba(247,147,26,0.12) 0%, transparent 40%); z-index: -1; }
-        nav { position: fixed; top: 0; width: 100%; padding: 1.5rem 8%; display: flex; justify-content: space-between; align-items: center; backdrop-filter: blur(20px); border-bottom: 1px solid var(--border); z-index: 1000; }
-        .logo { font-weight: 800; font-size: 1.4rem; color: var(--primary); display: flex; align-items: center; gap: 10px; text-decoration: none; cursor: pointer; }
-        .nav-links a { margin-left: 2rem; text-decoration: none; color: var(--text-muted); font-weight: 600; cursor: pointer; transition: 0.3s; }
-        .nav-links a:hover { color: var(--primary); }
-        .page-section { display: none; margin-top: 100px; padding: 2rem 8%; }
-        .page-section.active { display: block; animation: fadeIn 0.5s ease-out; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        .hero { text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 80vh; }
-        .hero h1 { font-size: 4rem; font-weight: 800; margin-bottom: 1rem; }
-        .hero h1 span { color: var(--primary); }
-        #node-map { height: 350px; width: 100%; max-width: 900px; border-radius: 30px; border: 1px solid var(--border); margin: 2rem 0; box-shadow: 0 20px 50px rgba(0,0,0,0.5); }
-        .vault-card { max-width: 450px; margin: 0 auto; background: var(--card-bg); padding: 2.5rem; border-radius: 40px; border: 1px solid var(--border); text-align: center; position: relative; overflow: hidden; }
-        .pin-display { font-size: 2.5rem; letter-spacing: 12px; color: var(--primary); font-family: 'Fira Code'; margin-bottom: 2rem; height: 50px; }
-        .pad-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
-        .pad-btn { padding: 1rem; border-radius: 18px; border: 1px solid var(--border); background: rgba(255,255,255,0.05); color: white; font-weight: 700; cursor: pointer; transition: 0.2s; }
-        .pad-btn:active { transform: scale(0.95); background: var(--primary); }
-        .btn-prime { background: var(--primary); color: white; padding: 0.8rem 2.5rem; border-radius: 50px; border: none; cursor: pointer; font-weight: 700; box-shadow: 0 10px 30px rgba(247, 147, 26, 0.3); }
-        .lockout-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(2, 6, 23, 0.95); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 10; color: var(--danger); }
-        .hidden { display: none !important; }
-    </style>
-</head>
-<body oncontextmenu="return false;"> <div class="bg-glow"></div>
-
-<nav>
-    <a onclick="switchTab('home')" class="logo"><i class="bi bi-hexagon-fill"></i> SOV.NETWORK</a>
-    <div class="nav-links">
-        <a onclick="switchTab('home')">Technology</a>
-        <a href="explorer.html" target="_blank">Explorer</a>
-        <a onclick="switchTab('vault')" class="btn-prime" style="color: white !important;">Access Vault</a>
-    </div>
-</nav>
-
-<div id="section-home" class="page-section active">
-    <div class="hero">
-        <h1>Global <span>Lattice</span> Mesh Infrastructure.</h1>
-        <p style="color: var(--text-muted);">Military-grade node handshakes across the sovereign map.</p>
-        <div id="node-map"></div>
-        <button onclick="switchTab('vault')" class="btn-prime">Initialize Handshake</button>
-    </div>
-</div>
-
-<div id="section-vault" class="page-section">
-    <div class="hero">
-        <div class="vault-card">
-            <div id="lockout-timer" class="lockout-overlay hidden">
-                <i class="bi bi-shield-slash" style="font-size: 3rem; margin-bottom: 1rem;"></i>
-                <h3>BRUTE FORCE DETECTED</h3>
-                <p id="timer-val" style="font-size: 1.2rem; font-weight: 800;"></p>
-            </div>
-            <h2>Identity Handshake</h2>
-            <div id="pin-login-container">
-                <div class="pin-display" id="pin-view">***</div>
-                <div class="pad-grid" id="pin-pad"></div>
-            </div>
-            <div id="v-status" style="margin-top:20px; font-size:10px; font-weight:800; color:var(--text-muted);">SECURE STANDBY</div>
-        </div>
-    </div>
-</div>
-
 <script>
+    const CipherShield = {
+        MESH_SECRET: "SOV_LATTICE_INTEGRITY_SHIELD_99",
+        encryptData(payload) {
+            return CryptoJS.AES.encrypt(JSON.stringify(payload), this.MESH_SECRET).toString();
+        },
+        decryptData(cipherText) {
+            try {
+                const bytes = CryptoJS.AES.decrypt(cipherText, this.MESH_SECRET);
+                return JSON.parse(bytes.toString(CryptoJS.enc.Utf8));
+            } catch (e) { return null; }
+        }
+    };
+
     let currentInput = "";
     let attempts = 0;
-    
     const PIN_HASH = "a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3";
+
+    const gun = Gun({
+        peers: ['https://gun-manhattan.herokuapp.com/gun', 'https://sov-relay.onrender.com/gun']
+    });
 
     function switchTab(tabId) {
         document.querySelectorAll('.page-section').forEach(sec => sec.classList.remove('active'));
@@ -100,13 +28,11 @@
 
     function handleInput(n) {
         if (localStorage.getItem('sov_lockout') > Date.now()) return;
-
         currentInput += n;
         document.getElementById('pin-view').innerText = "*".repeat(currentInput.length);
         
         if(currentInput.length === 3) {
             const inputHash = CryptoJS.SHA256(currentInput).toString();
-            
             if(inputHash === PIN_HASH) {
                 successRedirect("HANDSHAKE VERIFIED");
             } else {
@@ -114,16 +40,36 @@
                 currentInput = ""; 
                 document.getElementById('pin-view').innerText = "***";
                 const status = document.getElementById('v-status');
-                status.innerText = `INVALID HANDSHAKE: ${3 - attempts} REMAINING`;
+                
+                if(attempts >= 10) {
+                    executeSelfDestruct();
+                    return;
+                }
+
+                status.innerText = `INVALID HANDSHAKE: ${3 - (attempts % 3)} REMAINING`;
                 status.style.color = "var(--danger)";
                 
-                if(attempts >= 3) triggerLockout();
+                if(attempts % 3 === 0) triggerLockout();
             }
         }
     }
 
+    function executeSelfDestruct() {
+        localStorage.clear();
+        sessionStorage.clear();
+        document.body.innerHTML = `
+            <div style="height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center; background:#020617; color:#ef4444; text-align:center; font-family:sans-serif;">
+                <i class="bi bi-exclamation-triangle" style="font-size:4rem;"></i>
+                <h1 style="margin-top:20px;">NODE SELF-DESTRUCTED</h1>
+                <p style="color:#94a3b8; max-width:400px;">Identity Shards purged from local storage due to high-risk intrusion attempt. Handshake permanently voided.</p>
+                <button onclick="location.reload()" style="margin-top:30px; padding:10px 30px; border-radius:50px; border:none; background:#ef4444; color:white; font-weight:800; cursor:pointer;">RE-INITIALIZE FROM SCRATCH</button>
+            </div>
+        `;
+        console.warn("CRITICAL: SENSITIVE DATA PURGED.");
+    }
+
     function triggerLockout() {
-        const lockTime = Date.now() + (5 * 60 * 1000); // 5 Minutes Lock
+        const lockTime = Date.now() + (5 * 60 * 1000);
         localStorage.setItem('sov_lockout', lockTime);
         checkLockout();
     }
@@ -139,26 +85,28 @@
                 if(remaining <= 0) {
                     clearInterval(timer);
                     overlay.classList.add('hidden');
-                    attempts = 0;
                 }
             }, 1000);
         }
     }
+
     function successRedirect(msg) {
         const sessionKey = CryptoJS.lib.WordArray.random(32).toString();
         sessionStorage.setItem('sov_auth_session', sessionKey); 
-        
+        const secureShard = CipherShield.encryptData({
+            sender: "MASTER_ID", action: "HANDSHAKE_VERIFIED", timestamp: Date.now()
+        });
+        gun.get('sov_global_ledger').set(secureShard);
         localStorage.setItem('sov_id_created', 'true');
-        const status = document.getElementById('v-status');
-        status.innerText = msg;
-        status.style.color = "var(--success)";
+        document.getElementById('v-status').innerText = msg;
+        document.getElementById('v-status').style.color = "var(--success)";
         setTimeout(() => { window.location.href = "citadel.html"; }, 1000);
     }
 
     function renderPad() {
         const pad = document.getElementById('pin-pad');
+        if(!pad) return;
         pad.innerHTML = "";
-    
         [1,2,3,4,5,6,7,8,9,0].sort(() => Math.random() - 0.5).forEach(n => {
             const btn = document.createElement('button');
             btn.className = 'pad-btn'; btn.innerText = n;
@@ -172,7 +120,6 @@
         if (container._leaflet_id) return;
         const map = L.map('node-map', { zoomControl: false }).setView([20, 0], 2);
         L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png').addTo(map);
-
         const nodes = [[51.5, -0.09], [40.7, -74], [35.6, 139.6], [28.6, 77.2], [-33.8, 151.2], [19.07, 72.87]];
         nodes.forEach(pos => {
             L.circleMarker(pos, { color: '#f7931a', radius: 5, fillOpacity: 0.8 }).addTo(map)
@@ -182,5 +129,3 @@
 
     window.onload = () => { renderPad(); initMap(); checkLockout(); };
 </script>
-</body>
-</html>
