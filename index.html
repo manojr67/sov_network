@@ -105,14 +105,16 @@
         }
     }
 
-    function successRedirect(msg) {
+   function successRedirect(msg) {
+    console.log("HANDSHAKE VERIFIED. Forcing Redirect...");
     localStorage.setItem('sov_id_created', 'true');
-    const status = document.getElementById('v-status');
-    if (status) {
-        status.innerText = msg;
-        status.style.color = "var(--success)";
-    }
-
+    
+    // 🟢 'window.location.replace' का उपयोग करें क्योंकि यह ज़्यादा रिलायबल है
+    setTimeout(() => { 
+        // Render पर 'citadel' राउट का उपयोग करें (बिना .html के)
+        window.location.replace("/citadel"); 
+    }, 300)
+}
     try {
         // 📡 मेश पर हैंडशेक सिंक (Non-blocking)
         const handshake = CipherShield.encryptData({ action: "VERIFIED", ts: Date.now() });
