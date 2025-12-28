@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CITADEL APEX | Sovereign Professional Master OS</title>
+    <title>CITADEL APEX | Sovereign Omnichain Master OS</title>
     
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;500;700;800&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
@@ -23,31 +23,39 @@
             --success: #10b981; --danger: #ef4444; --shadow: 0 4px 20px rgba(0,0,0,0.05);
             --glow: 0 8px 32px rgba(255, 140, 0, 0.15);
         }
-
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); color: var(--text); display: flex; height: 100vh; overflow: hidden; }
-
-        /* 🏢 Sidebar UI */
+        
+        /* Sidebar UI */
         #nav { width: 260px; background: var(--sidebar); border-right: 1px solid var(--border); padding: 1.5rem 1.2rem; display: flex; flex-direction: column; z-index: 100; overflow-y: auto; box-shadow: 2px 0 10px rgba(0,0,0,0.02); }
         .logo-box { display: flex; align-items: center; gap: 12px; margin-bottom: 2rem; }
         .sov-logo { width: 40px; height: 40px; }
         .did-container { background: #f9fafb; border: 1px solid var(--border); padding: 12px; border-radius: 16px; margin-bottom: 1.5rem; cursor: pointer; transition: 0.3s; }
         .did-label { font-size: 8px; font-weight: 800; color: var(--primary); letter-spacing: 1px; display: block; margin-bottom: 4px; }
         .did-value { font-family: 'Fira Code', monospace; font-size: 9px; color: var(--muted); word-break: break-all; }
+        
         #nav a { color: var(--muted); text-decoration: none; padding: 12px 18px; border-radius: 14px; margin-bottom: 8px; font-weight: 600; display: flex; align-items: center; gap: 12px; transition: 0.3s; font-size: 13px; }
         #nav a.active { background: #fff5e6; color: var(--primary); border: 1px solid #ffe6cc; }
 
-        /* 🚀 Main Layout */
+        /* Main Content */
         #main { flex: 1; padding: 2rem; overflow-y: auto; display: flex; flex-direction: column; gap: 1.5rem; background: radial-gradient(circle at top right, #fff5e6, #f8fafc); }
         .grid-layout { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; }
         .card { padding: 1.5rem; border-radius: 24px; border: 1px solid var(--border); background: var(--card); box-shadow: var(--shadow); position: relative; transition: 0.4s; }
         .stat-label { font-size: 10px; font-weight: 800; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; }
         .stat-val { font-size: 2.8rem; font-weight: 800; letter-spacing: -2px; color: var(--text); margin-top: 5px; }
-        .btn-pill { background: linear-gradient(135deg, var(--primary), #ffb347); color: white; border: none; padding: 16px; border-radius: 18px; font-weight: 800; cursor: pointer; width: 100%; transition: 0.3s; box-shadow: 0 10px 20px rgba(255, 140, 0, 0.2); }
-        .sov-input { width: 100%; padding: 14px; border-radius: 14px; border: 1px solid var(--border); background: #f8fafc; color: var(--text); outline: none; margin-bottom: 12px; font-family: 'Fira Code'; font-size: 12px; }
+        
+        /* Professional Buttons & Inputs */
+        .btn-pill { background: linear-gradient(135deg, var(--primary), #ffb347); color: white; border: none; padding: 16px; border-radius: 18px; font-weight: 800; cursor: pointer; width: 100%; transition: 0.3s; box-shadow: 0 10px 20px rgba(255, 140, 0, 0.2); border: none; outline: none; }
+        .btn-pill:hover { transform: translateY(-2px); opacity: 0.9; }
+        .sov-input, .sov-textarea { width: 100%; padding: 14px; border-radius: 14px; border: 1px solid var(--border); background: #f8fafc; color: var(--text); outline: none; margin-bottom: 12px; font-family: 'Fira Code'; font-size: 12px; }
+        .sov-textarea { height: 120px; resize: none; }
+        
         .status-pill { padding: 4px 12px; border-radius: 20px; font-size: 10px; font-weight: 800; display: flex; align-items: center; gap: 6px; background: #ecfdf5; color: var(--success); }
         .hidden { display: none !important; }
         .badge { font-size: 9px; padding: 2px 8px; border-radius: 10px; background: #ecfdf5; color: var(--success); font-weight: 800; }
+        
+        /* Tokenomics Bar */
+        .t-bar { height: 10px; border-radius: 5px; overflow: hidden; display: flex; margin: 15px 0; background: #eee; }
     </style>
 </head>
 <body>
@@ -68,7 +76,7 @@
         <div class="did-value" id="nav-did-value">Loading...</div>
     </div>
     <a href="#" class="active" onclick="UI.tab('dashboard', this)"><i class="bi bi-grid-fill"></i> Dashboard</a>
-    <a href="#" onclick="UI.tab('bridge', this)"><i class="bi bi-link-45deg"></i> Asset Bridge</a>
+    <a href="#" onclick="UI.tab('bridge', this)"><i class="bi bi-link-45deg"></i> Omnichain Bridge</a>
     <a href="#" onclick="UI.tab('multisig', this)"><i class="bi bi-shield-shaded"></i> Multi-Sig Vault</a>
     <a href="#" onclick="UI.tab('gov', this)"><i class="bi bi-bank"></i> Governance</a>
     <a href="#" onclick="UI.tab('vaults', this)"><i class="bi bi-wallet2"></i> Terminal</a>
@@ -88,6 +96,19 @@
     </div>
 
     <div id="view-dashboard" class="view-section hidden">
+        <div class="card" style="margin-bottom: 1rem;">
+            <h4 class="stat-label">Global Tokenomics (1 Billion SOV)</h4>
+            <div class="t-bar">
+                <div style="width: 50%; background: var(--primary);" title="Community: 50%"></div>
+                <div style="width: 20%; background: #3b82f6;" title="CEX: 20%"></div>
+                <div style="width: 10%; background: #10b981;" title="Investors: 10%"></div>
+                <div style="width: 10%; background: #1a1c1e;" title="Master: 10%"></div>
+                <div style="width: 10%; background: #cbd5e1;" title="Reserve: 10%"></div>
+            </div>
+            <div style="display: flex; justify-content: space-between; font-size: 9px; font-weight: 800; color: var(--muted);">
+                <span>COMMUNITY (500M)</span><span>CEX (200M)</span><span>INVESTORS (100M)</span><span>MASTER (100M)</span>
+            </div>
+        </div>
         <div class="grid-layout">
             <div class="card" style="grid-column: span 2;">
                 <small class="stat-label">Total Asset Balance</small>
@@ -105,57 +126,94 @@
             <div class="card">
                 <h4 style="font-size:14px; margin-bottom:1rem;">Manual Mining</h4>
                 <button onclick="CoinEngine.startMining()" class="btn-pill">BOOST LATTICE</button>
-                <div id="mesh-pulse" style="height:4px; background:var(--primary); width:0%; transition:0.8s; border-radius:10px; margin-top:10px;"></div>
+                <div id="mesh-pulse" style="height:4px; background:var(--primary); width:0%; transition: 0.8s; border-radius:10px; margin-top:10px;"></div>
             </div>
         </div>
     </div>
 
     <div id="view-bridge" class="view-section hidden">
         <div class="card">
-            <h3>Cross-Chain Asset Bridge</h3>
-            <p style="font-size: 12px; color: var(--muted); margin-bottom: 20px;">Send SOV coins to Ethereum or Solana mainnet.</p>
-            <select id="bridge-chain" class="sov-input"><option>Ethereum (ERC-20)</option><option>Solana (SPL)</option></select>
-            <input type="text" id="bridge-addr" class="sov-input" placeholder="Receiver Address (0x... or SOL...)">
-            <input type="number" id="bridge-amt" class="sov-input" placeholder="Amount to Bridge">
-            <button onclick="BridgeEngine.initiate()" class="btn-pill">Initialize Cross-Chain Swap</button>
-        </div>
-    </div>
-
-    <div id="view-multisig" class="view-section hidden">
-        <div class="card">
-            <h3>Multi-Signature Approval</h3>
-            <p style="font-size: 12px; color: var(--muted); margin-bottom: 20px;">बड़े ट्रांजैक्शन के लिए सेकंडरी DID अप्रूवल आवश्यक करें।</p>
-            <input type="text" id="msig-partner" class="sov-input" placeholder="Secondary Signer DID (Nominee)">
-            <button onclick="VaultEngine.setNominee()" class="btn-pill">Set Multi-Sig Guard</button>
-            <div id="msig-status" style="margin-top: 15px; font-size: 11px; font-weight: 700; color: var(--primary);">Vault Status: Standard</div>
-        </div>
-    </div>
-
-    <div id="view-gov" class="view-section hidden">
-        <div class="card">
-            <h3>Staking & Governance</h3>
-            <div class="grid-layout" style="margin-top: 15px;">
-                <div class="card">
-                    <small class="stat-label">Stake for Power</small>
-                    <input type="number" id="stake-amt" class="sov-input" style="margin-top:10px" placeholder="Amount">
-                    <button onclick="GovEngine.stake()" class="btn-pill">Lock for Voting</button>
-                </div>
+            <h3>Omnichain API Liquidity Router</h3>
+            <div class="grid-layout" style="margin-top:20px;">
                 <div class="card" style="grid-column: span 2;">
-                    <small class="stat-label">Active Proposals</small>
-                    <div style="font-size: 13px; margin: 15px 0;"><b>#001:</b> Increase Mining Yield by 25%?</div>
-                    <button onclick="UI.notify('Gov', 'Vote Casted!')" class="btn-pill" style="background: var(--success);">Vote YES</button>
+                    <label class="stat-label">Target Network API</label>
+                    <select id="bridge-chain" class="sov-input" onchange="BridgeEngine.updateFees()">
+                        <optgroup label="Layer 1">
+                            <option value="BTC">Bitcoin (Taproot)</option>
+                            <option value="ETH">Ethereum (Mainnet)</option>
+                            <option value="SOL">Solana (Sealevel)</option>
+                        </optgroup>
+                        <optgroup label="EVM / Layer 2">
+                            <option value="MATIC">Polygon PoS</option>
+                            <option value="BSC">Binance Smart Chain</option>
+                            <option value="ARB">Arbitrum One</option>
+                            <option value="BASE">Coinbase Base</option>
+                        </optgroup>
+                    </select>
+                    <input type="text" id="bridge-addr" class="sov-input" placeholder="Destination Wallet Address">
+                    <input type="number" id="bridge-amt" class="sov-input" placeholder="Amount (SOV)" oninput="BridgeEngine.updateFees()">
+                </div>
+                <div class="card">
+                    <small class="stat-label">API Telemetry</small>
+                    <div style="font-size:11px; margin-top:10px;">
+                        Burn Fee: <b id="fee-val">0.00 SOV</b><br>
+                        Risk Vector: <b id="risk-status" style="color:var(--success)">CLEAR</b>
+                    </div>
+                    <button onclick="BridgeEngine.initiate()" class="btn-pill" style="margin-top:20px;">EXECUTE API BRIDGE</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <div id="view-vaults" class="view-section hidden"><div class="card"><h3>Terminal: Top 50</h3><div id="crypto-terminal-list"></div></div></div>
-    <div id="view-profile" class="view-section hidden"><div class="card"><h2>Identity</h2><textarea id="raw-json-view" class="sov-textarea" style="height:200px; margin-top:20px;" readonly></textarea></div></div>
+    <div id="view-profile" class="view-section hidden">
+        <div class="grid-layout">
+            <div class="card" style="grid-column: span 2;">
+                <h3 style="margin-bottom: 1.5rem;"><i class="bi bi-shield-shaded"></i> Sovereign Identity Shard</h3>
+                <label class="stat-label">Public Access Point (DID)</label>
+                <div class="sov-input" style="height: auto; word-break: break-all; font-size: 10px; padding: 20px; border: 1px dashed var(--primary);">
+                    <span id="profile-did-full">Not Authorized</span>
+                </div>
+                <div style="display: flex; gap: 10px; margin-top: 15px;">
+                    <button onclick="UI.copyDID()" class="btn-pill" style="background: #f1f5f9; color: var(--text); box-shadow: none;"><i class="bi bi-clipboard"></i> Copy DID</button>
+                    <button onclick="UI.exportJSON()" class="btn-pill"><i class="bi bi-filetype-json"></i> EXPORT JSON SHARD</button>
+                </div>
+            </div>
+            <div class="card">
+                <h4 class="stat-label">Security Protocol</h4>
+                <div style="margin-top: 15px;">
+                    <button onclick="RecoveryForge.generatePDF()" class="btn-pill" style="background: var(--success); margin-bottom: 10px;"><i class="bi bi-file-pdf"></i> RECOVERY PDF</button>
+                    <p style="font-size: 10px; color: var(--muted);">JSON Shard contains your Private Lattice Keys. Keep it offline.</p>
+                </div>
+            </div>
+        </div>
+        <div class="card" style="margin-top: 1rem;">
+            <h4 class="stat-label">Raw Cryptographic JSON</h4>
+            <textarea id="raw-json-view" class="sov-textarea" style="margin-top: 10px; height: 180px;" readonly></textarea>
+        </div>
+    </div>
+
+    <div id="view-multisig" class="view-section hidden">
+        <div class="card"><h3>Multi-Sig Guard</h3><input type="text" id="msig-partner" class="sov-input" placeholder="Partner Signer DID"><button onclick="VaultEngine.setNominee()" class="btn-pill">Activate Multi-Sig</button><div id="msig-status" style="margin-top:10px; font-size:11px;">Status: Standard</div></div>
+    </div>
+    <div id="view-gov" class="view-section hidden"><div class="card"><h3>Staking Governance</h3><input type="number" id="stake-amt" class="sov-input" placeholder="Amount"><button onclick="GovEngine.stake()" class="btn-pill">Lock Assets</button></div></div>
+    <div id="view-vaults" class="view-section hidden"><div class="card"><h3>Mesh Terminal</h3><div id="crypto-terminal-list"></div></div></div>
 </main>
 
 <script>
 let userKeys = null, myBalance = 0, stakedBalance = 0;
 const MASTER_DID = "FvXKT94VcOyIcJSxySlQOKPnB1prkmogSJEK9JaIVP4.BZaHpUNfRNfLls4ntuLHcrj_4NcamS-UczxRSMQ56C8";
+const TOTAL_SUPPLY = 1000000000; // 1 Billion SOV
+const MASTER_ALLOCATION = 100000000; // 10% (100M) for Master DID
+
+// --- 🛡️ CORE ANTI-WHALE MONITOR ---
+const AntiWhaleGuard = {
+    checkRisk(amount) {
+        const percentage = (amount / TOTAL_SUPPLY) * 100;
+        if (percentage <= 1) return { status: "SAFE", action: "NONE" };
+        else if (percentage <= 5) return { status: "WHALE", action: "MULTISIG" };
+        else return { status: "MONOPOLY", action: "GOVERNANCE" };
+    }
+};
 
 const IdentityEngine = {
     async loginWithDID() {
@@ -167,16 +225,19 @@ const IdentityEngine = {
             else if(input.includes(MASTER_DID)) userKeys = { pub: input };
             localStorage.setItem('sov_vault_enc', CryptoJS.AES.encrypt(JSON.stringify(userKeys), "123").toString());
             this.launch();
-        } catch(e) { UI.notify("Error", "Invalid Format"); }
+        } catch(e) { UI.notify("Error", "Invalid Authorization Format."); }
     },
     launch() {
         if(userKeys && userKeys.pub) {
             document.getElementById('nav-did-value').innerText = userKeys.pub.substring(0, 30) + "...";
+            document.getElementById('profile-did-full').innerText = userKeys.pub;
             document.getElementById('raw-json-view').value = JSON.stringify(userKeys);
+            
             if (userKeys.pub.includes(MASTER_DID)) {
-                myBalance = 100000000;
-                gun.get('sov_v72_wallets').get(userKeys.pub).put({ balance: 100000000 });
+                myBalance = MASTER_ALLOCATION; // 100M (10% of 1B)
+                gun.get('sov_v72_wallets').get(userKeys.pub).put({ balance: MASTER_ALLOCATION });
             }
+            
             CoinEngine.init(); UI.tab('dashboard');
             document.getElementById('nav').classList.remove('hidden');
             document.getElementById('view-auth').classList.add('hidden');
@@ -186,12 +247,33 @@ const IdentityEngine = {
 };
 
 const BridgeEngine = {
+    FEES: { BTC: 0.08, ETH: 0.04, SOL: 0.015, XRP: 0.01, MATIC: 0.005, ARB: 0.008, BSC: 0.01, BASE: 0.007 },
+    updateFees() {
+        const chain = document.getElementById('bridge-chain').value;
+        const amt = parseFloat(document.getElementById('bridge-amt').value) || 0;
+        const fee = amt * this.FEES[chain];
+        document.getElementById('fee-val').innerText = `${fee.toFixed(4)} SOV`;
+        const risk = AntiWhaleGuard.checkRisk(amt);
+        document.getElementById('risk-status').innerText = risk.status;
+        document.getElementById('risk-status').style.color = risk.action === "NONE" ? "var(--success)" : "var(--danger)";
+    },
     initiate() {
         const amt = parseFloat(document.getElementById('bridge-amt').value);
-        if(amt > myBalance) return UI.notify("Bridge", "Insufficient Funds");
-        myBalance -= amt;
-        document.getElementById('total-val').innerText = myBalance.toLocaleString();
-        UI.notify("Bridge", `Bridged ${amt} SOV. TX Hash: 0x${Math.random().toString(16).substr(2,8)}`);
+        const chain = document.getElementById('bridge-chain').value;
+        if(amt > myBalance) return UI.notify("Bridge", "Insufficient Liquidity.");
+        
+        const risk = AntiWhaleGuard.checkRisk(amt);
+        if(risk.action === "MULTISIG" && !document.getElementById('msig-status').innerText.includes("Active")) {
+            return UI.notify("Security Block", "Whale Move: Multi-Sig Required.");
+        }
+        if(risk.action === "GOVERNANCE" && stakedBalance < (TOTAL_SUPPLY * 0.05)) {
+            return UI.notify("Monopoly Block", "Critical Move: 5% Staked Power Required.");
+        }
+
+        const fee = amt * this.FEES[chain];
+        myBalance -= (amt + fee);
+        gun.get('sov_v72_wallets').get(userKeys.pub).put({ balance: myBalance });
+        UI.notify("Handshake", `Bridged to ${chain}. Fee Burned.`);
     }
 };
 
@@ -200,7 +282,7 @@ const VaultEngine = {
         const nom = document.getElementById('msig-partner').value;
         if(nom) {
             document.getElementById('msig-status').innerText = `Vault Status: Multi-Sig Active (Signer: ${nom.substring(0,8)}...)`;
-            UI.notify("Security", "Multi-Sig Enabled");
+            UI.notify("Security", "Multi-Sig Guard Initialized.");
         }
     }
 };
@@ -208,12 +290,12 @@ const VaultEngine = {
 const GovEngine = {
     stake() {
         const amt = parseFloat(document.getElementById('stake-amt').value);
-        if(amt > myBalance) return UI.notify("Gov", "Insufficient Balance");
+        if(amt > myBalance) return UI.notify("Gov", "Insufficient Funds.");
         myBalance -= amt; stakedBalance += amt;
-        document.getElementById('total-val').innerText = myBalance.toLocaleString();
         document.getElementById('staked-val').innerText = stakedBalance.toLocaleString();
-        document.getElementById('gov-status').innerText = `VOTING POWER: ${((stakedBalance/100000000)*100).toFixed(6)}%`;
-        UI.notify("Gov", `${amt} SOV Staked.`);
+        document.getElementById('gov-status').innerText = `VOTING POWER: ${((stakedBalance/TOTAL_SUPPLY)*100).toFixed(6)}%`;
+        gun.get('sov_v72_wallets').get(userKeys.pub).put({ balance: myBalance });
+        UI.notify("Governance", "Assets Staked.");
     }
 };
 
@@ -236,7 +318,7 @@ const CoinEngine = {
 
 const AnalyticsEngine = {
     init() {
-        new Chart(document.getElementById('growth-chart'), { type: 'line', data: { labels: ['H1', 'H2', 'H3', 'H4'], datasets: [{ data: [10, 15, 12, 18], borderColor: '#ff8c00', fill: true, backgroundColor: 'rgba(255, 140, 0, 0.05)' }] } });
+        new Chart(document.getElementById('growth-chart'), { type: 'line', data: { labels: ['Q1', 'Q2', 'Q3', 'Q4'], datasets: [{ data: [10, 15, 12, 18], borderColor: '#ff8c00', fill: true, backgroundColor: 'rgba(255, 140, 0, 0.05)' }] }, options: { plugins: { legend: { display: false } } } });
     }
 };
 
@@ -248,12 +330,31 @@ const UI = {
         if(id === 'vaults') this.loadTerminal();
     },
     notify(t, m) { const div = document.createElement('div'); div.style.cssText = "background:white; border-left:4px solid var(--primary); padding:16px; margin-bottom:10px; font-size:12px; font-weight:700; box-shadow: var(--shadow);"; div.innerHTML = `<b>${t}:</b> ${m}`; document.getElementById('notif-container').appendChild(div); setTimeout(() => div.remove(), 3000); },
+    copyDID() { navigator.clipboard.writeText(userKeys.pub); UI.notify("Secure", "DID Copied."); },
+    exportJSON() {
+        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(userKeys));
+        const downloadAnchorNode = document.createElement('a');
+        downloadAnchorNode.setAttribute("href", dataStr);
+        downloadAnchorNode.setAttribute("download", "SOV_Identity_Shard.json");
+        document.body.appendChild(downloadAnchorNode);
+        downloadAnchorNode.click();
+        downloadAnchorNode.remove();
+        UI.notify("Export", "JSON Shard Downloaded.");
+    },
     async loadTerminal() {
         const terminal = document.getElementById('crypto-terminal-list');
         try {
             const res = await fetch(`https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&per_page=50`);
             const data = await res.json(); terminal.innerHTML = data.map(c => `<div class="crypto-node"><img src="${c.image}" width="20"><br><b>${c.symbol.toUpperCase()}</b><br>$${c.current_price.toLocaleString()}</div>`).join('');
         } catch(e) {}
+    }
+};
+
+const RecoveryForge = {
+    generatePDF() {
+        const doc = document.createElement('div');
+        doc.innerHTML = `<div style="padding:40px; border:5px solid #ff8c00;"><h1>APEX RECOVERY</h1><h3>DID:</h3><p>${userKeys.pub}</p><h3>VAULT JSON:</h3><p style="word-break:break-all; font-size:8px;">${JSON.stringify(userKeys)}</p></div>`;
+        html2pdf().from(doc).save();
     }
 };
 
