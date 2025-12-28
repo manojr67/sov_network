@@ -4,14 +4,15 @@ const path = require('path');
 const cors = require('cors');
 const rateLimit = require('express-rate-limit');
 const https = require('https');
-const cron = require('node-cron'); // ⏲️ बैकअप शेड्यूल करने के लिए
+const cron = require('node-cron');
 
 const app = express();
 const port = process.env.PORT || 10000;
 
-// --- 🛡️ SECURITY & ALLOW-LIST ---
+// --- 🛡️ SECURITY CONFIG ---
 const ALLOWED_IPS = ['127.0.0.1', '::1']; 
-const GUARDIAN_NODES = ['https://sov-relay.onrender.com/gun']; // ट्रस्टेड पीयर्स
+const MASTER_BYPASS_KEY = "MJRAWAT_FORTRESS_KEY_99"; // आपकी गुप्त चाबी
+const GUARDIAN_NODES = ['https://sov-relay.onrender.com/gun'];
 
 // --- 🛡️ IP CACHING LOGIC ---
 const ipCache = new Map(); 
@@ -44,36 +45,38 @@ async function checkIPHealth(ip) {
     });
 }
 
-// --- ⛓️ STORAGE PERSISTENCE: MESH SNAPSHOTS ---
-// 
+// --- ⛓️ STORAGE PERSISTENCE ---
 const takeMeshSnapshot = () => {
     console.log("📸 Initiating Cold Mesh Snapshot...");
     gun.get('sov_immutable_lattice').once((data) => {
         if (!data) return;
-        // यहाँ आप Arweave या IPFS पर डेटा पुश करने का लॉजिक जोड़ सकते हैं
         console.log("✅ Snapshot Completed: Local Mesh Data is Consistent.");
     });
 };
-
-// हर 24 घंटे में ऑटोमैटिक बैकअप (Cron Job)
 cron.schedule('0 0 * * *', takeMeshSnapshot);
 
-// --- 🛡️ MIDDLEWARE ---
+// --- 🛡️ MERGED MIDDLEWARE: BYPASS + IP FILTER ---
 app.use(async (req, res, next) => {
     const ip = req.headers['x-forwarded-for']?.split(',')[0] || req.socket.remoteAddress;
-    if (ALLOWED_IPS.includes(ip)) return next();
+    const clientSecret = req.headers['x-sov-master-key'];
 
+    // 1. सबसे पहले 'Bypass Key' या 'Allow-List' चेक करें
+    if (clientSecret === MASTER_BYPASS_KEY || ALLOWED_IPS.includes(ip)) {
+        return next(); 
+    }
+
+    // 2. अगर आप 'Bypass' नहीं कर रहे, तो VPN/Proxy चेक करें
     const check = await checkIPHealth(ip);
     if (check.blocked) {
-        console.warn(`🚨 BLOCKED: ${ip} (${check.reason})`);
-        return res.status(403).send("<h1>403 Access Denied</h1>Sovereign Mesh Security active.");
+        console.warn(`🚨 ACCESS DENIED: ${ip} (${check.reason})`);
+        return res.status(403).send("<h1>403 Sovereign Violation</h1>Access denied by Mesh Security.");
     }
     next();
 });
 
 const limiter = rateLimit({
     windowMs: 15 * 60 * 1000,
-    max: 100, // रिलायबिलिटी के लिए थोड़ी छूट
+    max: 100,
     message: "Sovereign Shield: Rate limit exceeded."
 });
 
@@ -87,14 +90,13 @@ app.get('/citadel', (req, res) => res.sendFile(path.join(__dirname, 'citadel.htm
 app.get('/explorer', (req, res) => res.sendFile(path.join(__dirname, 'explorer.html')));
 
 const server = app.listen(port, () => {
-    console.log(`🚀 Master Relay V190.0 Hybrid Online at Port ${port}`);
+    console.log(`🚀 Master Relay V190.5 Merged Online at Port ${port}`);
 });
 
-// --- 🔗 CONSOLIDATED MESH CONSENSUS ---
-// 
+// --- 🔗 CONSOLIDATED MESH ---
 const gun = Gun({
     web: server,
     peers: [...GUARDIAN_NODES, 'https://peer.wall.org/gun'],
-    radisk: true, // Local persistence active
-    localStorage: false // ब्राउज़र स्टोरेज की जगह राडिस्क का उपयोग करें
+    radisk: true,
+    localStorage: false 
 });
