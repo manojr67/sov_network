@@ -3,76 +3,117 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LATTICE EXPLORER | Sovereign Mesh Intelligence</title>
+    <title>SOV EXPLORER | Mesh Lattice Monitor</title>
+    
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;500;700;800&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/gun/gun.js"></script>
+
     <style>
-        :root { --primary: #ff8c00; --bg: #f8fafc; --card: #ffffff; --text: #1a1c1e; --muted: #64748b; --border: #e2e8f0; --success: #10b981; }
-        body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); color: var(--text); padding: 2rem; overflow-x: hidden; }
-        .grid-layout { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; }
-        .card { padding: 1.5rem; border-radius: 24px; border: 1px solid var(--border); background: var(--card); box-shadow: 0 4px 20px rgba(0,0,0,0.05); }
-        #live-stream-container { height: 400px; overflow-y: auto; background: #fafafa; border-radius: 20px; padding: 20px; font-family: 'Fira Code'; font-size: 11px; border: 1px solid var(--border); margin-top: 15px; }
-        .stream-entry { margin-bottom: 10px; border-left: 3px solid var(--primary); padding-left: 12px; }
-        .sov-table { width: 100%; border-collapse: collapse; margin-top: 1rem; font-size: 11px; }
-        .sov-table th { text-align: left; padding: 12px; color: var(--muted); border-bottom: 2px solid var(--border); }
-        .sov-table td { padding: 12px; border-bottom: 1px solid var(--border); }
+        :root { --primary: #ff8c00; --bg: #0f172a; --card: #1e293b; --text: #f8fafc; --muted: #94a3b8; --border: #334155; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); color: var(--text); padding: 2rem; font-size: 13px; }
+        .container { max-width: 1100px; margin: 0 auto; }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; border-bottom: 1px solid var(--border); padding-bottom: 1rem; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; }
+        .card { background: var(--card); border: 1px solid var(--border); padding: 1.5rem; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
+        .stat-label { font-size: 10px; font-weight: 800; color: var(--primary); text-transform: uppercase; letter-spacing: 1px; }
+        .sov-table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+        .sov-table th { text-align: left; padding: 12px; color: var(--muted); border-bottom: 1px solid var(--border); font-size: 11px; }
+        .sov-table td { padding: 12px; border-bottom: 1px solid var(--border); font-family: 'Fira Code'; font-size: 12px; }
+        .hash-link { color: #38bdf8; text-decoration: none; cursor: pointer; }
+        .tag { padding: 4px 8px; border-radius: 6px; font-size: 9px; font-weight: 800; }
+        .tag-vm { background: rgba(56, 189, 248, 0.1); color: #38bdf8; }
+        .tag-rebase { background: rgba(255, 140, 0, 0.1); color: var(--primary); }
+        .tag-anchor { background: rgba(16, 185, 129, 0.1); color: #10b981; }
+        #live-status { display: flex; align-items: center; gap: 8px; font-size: 11px; color: #10b981; }
+        .pulse { width: 8px; height: 8px; background: #10b981; border-radius: 50%; animation: blink 1.5s infinite; }
+        @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
     </style>
 </head>
 <body>
-    <div style="display:flex; justify-content:space-between; margin-bottom:2rem;">
-        <h2>LATTICE EXPLORER <small style="font-size:10px; color:var(--muted);">v165.0 SECURE</small></h2>
-        <div id="net-status" style="font-size:10px; font-weight:800; color:var(--success);">MESH LIVE: CONNECTED</div>
+
+<div class="container">
+    <div class="header">
+        <div>
+            <h1 style="font-weight: 800; letter-spacing: -1px;">SOV LATTICE EXPLORER</h1>
+            <p style="color: var(--muted);">Real-time Mesh Intelligence Shards</p>
+        </div>
+        <div id="live-status"><div class="pulse"></div> MESH LIVE</div>
     </div>
-    <div class="grid-layout">
+
+    <div class="grid">
         <div class="card" style="grid-column: span 2;">
-            <h4>Live Encrypted Shard Stream</h4>
-            <div id="live-stream-container">Syncing Handshakes...</div>
+            <h4 class="stat-label">Verified Execution Shards (VM)</h4>
+            <table class="sov-table">
+                <thead>
+                    <tr><th>Shard ID</th><th>Type</th><th>Output</th><th>Timestamp</th></tr>
+                </thead>
+                <tbody id="vm-shards-body">
+                    <tr><td colspan="4" style="text-align:center; color:var(--muted);">Listening to Lattice...</td></tr>
+                </tbody>
+            </table>
         </div>
+
         <div class="card">
-            <h4>Mesh Telemetry</h4>
-            <div style="margin-top:20px;">Latency: <b style="color:var(--success);">0.4ms</b><br>Encryption: <b>AES-256</b><br>Peers: <b id="peer-count">...</b></div>
+            <h4 class="stat-label">Elastic Supply History</h4>
+            <div id="rebase-logs" style="margin-top: 1rem;">
+                <p style="font-size: 11px; color: var(--muted);">No Rebase Events Detected.</p>
+            </div>
         </div>
     </div>
-    <div class="card" style="margin-top:20px;">
-        <h4>Decentralized Shard Ledger</h4>
-        <table class="sov-table">
-            <thead><tr><th>Hash</th><th>Origin</th><th>Action</th><th>Status</th></tr></thead>
-            <tbody id="ledger-list"></tbody>
-        </table>
+
+    <div class="card" style="margin-top: 1.5rem;">
+        <h4 class="stat-label">Global Lattice Apps (DApps)</h4>
+        <div id="mesh-apps-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 15px;">
+            </div>
     </div>
+</div>
 
 <script>
-    const CipherShield = {
-        MESH_SECRET: "SOV_LATTICE_INTEGRITY_SHIELD_99",
-        decrypt(cipher) {
-            try { return JSON.parse(CryptoJS.AES.decrypt(cipher, this.MESH_SECRET).toString(CryptoJS.enc.Utf8)); }
-            catch(e) { return null; }
-        }
-    };
-    const gun = Gun({ peers: ['https://gun-manhattan.herokuapp.com/gun', 'https://sov-relay.onrender.com/gun'] });
-    let txnCounter = 0;
+    const gun = Gun(['https://sov-relay.onrender.com/gun', 'https://gun-manhattan.herokuapp.com/gun']);
 
-    gun.get('sov_global_ledger').map().on((cipher, id) => {
-        const data = CipherShield.decrypt(cipher);
-        if(!data) return; // Ignore unreadable/unauthorized shards
-
-        const stream = document.getElementById('live-stream-container');
-        if(txnCounter === 0) stream.innerHTML = "";
-        const entry = document.createElement('div');
-        entry.className = 'stream-entry';
-        entry.innerHTML = `[${new Date().toLocaleTimeString()}] <b style="color:#ff8c00">${data.action || 'AUTH'}</b>: Identity ${data.sender.substring(0,8)} verified.`;
-        stream.prepend(entry);
-
-        const ledger = document.getElementById('ledger-list');
-        const row = ledger.insertRow(0);
-        row.innerHTML = `<td>${id.substring(0,10)}</td><td>${data.sender.substring(0,15)}...</td><td>${data.type || 'HANDSHAKE'}</td><td style="color:green">SECURE</td>`;
-        if(ledger.rows.length > 15) ledger.deleteRow(15);
-        txnCounter++;
+    // 1. Listen for VM Executions
+    gun.get('sov_blockchain_state').get('vm_executions').map().once((data, id) => {
+        if(!data) return;
+        const tbody = document.getElementById('vm-shards-body');
+        if(tbody.innerHTML.includes('Listening')) tbody.innerHTML = '';
+        
+        const row = `<tr>
+            <td class="hash-link">${data.shardID.substring(0,12)}...</td>
+            <td><span class="tag tag-vm">${data.type.toUpperCase()}</span></td>
+            <td style="color:#10b981;">${data.output}</td>
+            <td style="color:var(--muted);">${new Date(data.timestamp).toLocaleTimeString()}</td>
+        </tr>`;
+        tbody.innerHTML = row + tbody.innerHTML;
     });
 
-    setInterval(() => { document.getElementById('peer-count').innerText = Math.floor(Math.random() * 5) + 20; }, 3000);
+    // 2. Listen for Stability Rebase Events
+    gun.get('sov_blockchain_state').get('rebase_history').map().once((data) => {
+        if(!data) return;
+        const container = document.getElementById('rebase-logs');
+        if(container.innerHTML.includes('No Rebase')) container.innerHTML = '';
+        
+        const log = `<div style="padding:10px; border-bottom:1px solid var(--border); font-size:11px;">
+            <span class="tag tag-rebase">${data.type}</span> 
+            <b style="color:white;">${(data.factor * 100).toFixed(4)}%</b>
+            <div style="color:var(--muted); margin-top:4px;">${new Date(data.timestamp).toLocaleString()}</div>
+        </div>`;
+        container.innerHTML = log + container.innerHTML;
+    });
+
+    // 3. Listen for Global Apps
+    gun.get('sov_mesh_apps').map().once((app) => {
+        if(!app) return;
+        const grid = document.getElementById('mesh-apps-grid');
+        const card = `<div style="background:#0f172a; padding:10px; border-radius:10px; border:1px solid var(--border);">
+            <div style="font-weight:800; font-size:11px; color:var(--primary);">${app.type.toUpperCase()} APP</div>
+            <div style="font-family:Fira Code; font-size:10px; margin-top:5px; color:var(--muted);">${app.id.substring(0,15)}...</div>
+        </div>`;
+        grid.innerHTML += card;
+    });
 </script>
+
 </body>
 </html>

@@ -14,6 +14,9 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.9.6/lottie.min.js"></script>
 
+    <script src="core/sov-vm.js"></script>
+    <script src="core/stability-engine.js"></script>
+
     <style>
         :root { 
             --primary: #ff8c00; --bg: #f8fafc; --sidebar: #ffffff; --card: #ffffff; 
@@ -82,7 +85,7 @@
     <a href="#" onclick="UI.tab('bridge', this)"><i class="bi bi-link-45deg"></i> Omni-Bridge</a>
     <a href="#" onclick="UI.tab('vaults', this)"><i class="bi bi-wallet2"></i> Crypto Terminal</a>
     <a href="#" onclick="UI.tab('p2p', this)"><i class="bi bi-shop"></i> P2P Market</a>
-    <a href="#" onclick="UI.tab('gov', this)"><i class="bi bi-bank"></i> DAO Governance</a>
+    <a href="#" onclick="UI.tab('gov', this)"><i class="bi bi-cpu-fill"></i> Sovereign IDE</a>
     <a href="#" onclick="UI.tab('profile', this)"><i class="bi bi-person-bounding-box"></i> Identity</a>
     <div style="margin-top: auto; padding: 18px; border-radius: 18px; background: #fff1f2; color: #ef4444; cursor: pointer; text-align: center; font-weight: 700; font-size: 13px;" onclick="location.reload()">SYSTEM LOCK</div>
 </nav>
@@ -102,7 +105,7 @@
         <div class="grid-layout">
             <div class="card" style="grid-column: span 2; border-left: 5px solid var(--success);">
                 <h4 class="stat-label">Treasury & Liquidity</h4>
-                <div class="stat-val"><span id="total-val">LOCKED</span> <small style="font-size:1.2rem; color:var(--primary)">SOV</small></div>
+                <div class="stat-val"><span id="total-val">100,000,000.00</span> <small style="font-size:1.2rem; color:var(--primary)">SOV</small></div>
                 <button onclick="SecurityGate.open(() => IdentityEngine.syncBalance())" id="unlock-bal-btn" style="background:none; border:none; color:var(--primary); cursor:pointer; font-weight:800; font-size: 13px;">[ DECRYPT BALANCE ]</button>
                 <div style="margin-top:10px;">
                     <button onclick="GhostMesh.connectRadio()" class="stat-label" style="background:none; border:none; color:var(--muted); cursor:pointer;">[ 📶 CONNECT LoRa MESH ]</button>
@@ -112,7 +115,7 @@
             <div class="card" style="border-left: 5px solid var(--danger);">
                 <small class="stat-label">ZKP Status</small>
                 <div class="stat-val" style="font-size: 1.5rem; color: var(--success);">SHIELDED</div>
-                <div style="margin-top:5px; font-size:9px; color:var(--muted)">Anchoring Mode: Enabled</div>
+                <div style="margin-top:5px; font-size:9px; color:var(--muted)">Peg: $1.00 (Stable)</div>
             </div>
         </div>
         <div class="card" style="margin-top:1.5rem;"><canvas id="growth-chart" style="height:250px;"></canvas></div>
@@ -145,7 +148,29 @@
         </div>
     </div>
 
-    <div id="view-gov" class="view-section hidden"><div class="card"><h4>DAO Governance</h4><p style="font-size: 13px;">Time-Locked Commits: Active (24H)</p></div></div>
+    <div id="view-gov" class="view-section hidden">
+        <div class="grid-layout">
+            <div class="card" style="grid-column: span 2;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                    <h4 class="stat-label">Sovereign IDE | Universal Mesh Compiler</h4>
+                    <select id="lang-selector" class="sov-input" style="width: 150px; margin-bottom: 0;">
+                        <option value="solidity">Solidity (EVM)</option>
+                        <option value="python">Python (Logic)</option>
+                        <option value="web">DApp (HTML/JS)</option>
+                    </select>
+                </div>
+                <textarea id="mesh-editor" class="sov-textarea" style="height: 350px; background: #0f172a; color: #38bdf8;" placeholder="// Challenge the Monopoly... Write Solidity or Python code here..."></textarea>
+                <button onclick="VM_Controller.deploy()" class="btn-pill" style="margin-top:15px;">DEPLOY TO MESH BLOCKCHAIN</button>
+            </div>
+            <div class="card">
+                <h4 class="stat-label">Lattice VM Status</h4>
+                <div id="vm-monitor" style="margin-top: 20px;">
+                    <div class="stat-val" id="sov-peg-val">$1.00</div>
+                    <p id="rebase-status" style="color: var(--success); font-weight: 800; font-size: 10px;">MODE: EQUILIBRIUM</p>
+                </div>
+            </div>
+        </div>
+    </div>
     
     <div id="view-p2p" class="view-section hidden">
         <div class="grid-layout">
@@ -197,6 +222,9 @@
                 </div>
                 <h4 class="stat-label" style="margin-top: 25px; text-align: left;">Identity Shard (JSON)</h4>
                 <textarea id="raw-json-view" class="sov-textarea" style="background: #000; height: 120px; border: 1px solid #1e293b; color: #38bdf8;" readonly></textarea>
+                <div style="margin-top:15px; border-top:1px solid #1e293b; padding-top:10px; font-size:10px; text-align:left; color:#64748b;">
+                    SYMBOL: SOV | DECIMALS: 18 | STANDARD: LATTICE-POST-QUANTUM | TYPE: ELASTIC SUPPLY
+                </div>
                 <button onclick="UI.copyDID()" class="btn-pill" style="margin-top: 15px; background: transparent; border: 1px solid var(--primary); color: var(--primary);">COPY MASTER SHARD</button>
             </div>
         </div>
@@ -210,9 +238,36 @@ const CipherShield = {
 };
 
 let userKeys = null, pinBuffer = "", pendingAction = null;
-const gun = Gun({ peers: ['https://gun-manhattan.herokuapp.com/gun', 'https://peer.wall.org/gun', 'https://sov-relay.onrender.com/gun'] });
+const gun = Gun({ peers: ['https://gun-manhattan.herokuapp.com/gun', 'https://sov-relay.onrender.com/gun'] });
 
-// --- 🔄 LATTICE ATOMIC SWAP ENGINE ---
+// --- 🕹️ MJRAWAT VM CONTROLLER ---
+const VM_Controller = {
+    async deploy() {
+        const type = document.getElementById('lang-selector').value;
+        const code = document.getElementById('mesh-editor').value;
+        if(!code) return UI.notify("Error", "No code detected in IDE.");
+        
+        UI.notify("Mesh", `Compiling ${type.toUpperCase()} Shard...`);
+        
+        // Handshake with sov-vm.js
+        if(typeof SovereignVM !== 'undefined') {
+            const result = await SovereignVM.runShard(code, type, null);
+            if(result) {
+                const txHash = CryptoJS.SHA256(code + Date.now()).toString();
+                gun.get('sov_mesh_apps').get(txHash).put({ id: txHash, type, logic: code, owner: userKeys.pub });
+                
+                // Stability & Anchor Trigger
+                if(typeof StabilityEngine !== 'undefined') StabilityEngine.checkStability();
+                LatticeIntegritySeal.triggerAnchoring();
+                
+                UI.notify("Success", "Contract Live on Mesh Blockchain.");
+            }
+        } else {
+            UI.notify("System", "VM Core Offline. Check sov-vm.js");
+        }
+    }
+};
+
 const AtomicSwapEngine = {
     currentSwap: null,
     generateSecret() {
@@ -261,41 +316,27 @@ const GhostMesh = {
             this.port = await navigator.serial.requestPort();
             await this.port.open({ baudRate: 115200 });
             UI.notify("Mesh", "LoRa Radio Connected.");
-        } catch(e) { UI.notify("Radio", "Connection Failed."); }
+        } catch(e) { UI.notify("Radio", "Connection Failed: No Hardware."); }
     }
 };
 
 const PersistenceEngine = {
     async pinToIPFS() {
         UI.notify("IPFS", "Initializing Global Mirroring...");
-        setTimeout(() => UI.notify("IPFS", "System Mirrored."), 3000);
+        setTimeout(() => UI.notify("IPFS", "System Mirrored Globally."), 3000);
     }
 };
 
 const BitcoinAnchoring = {
     async anchorHash(latticeHash) {
-        UI.notify("Integrity", "Anchoring to BTC...");
         try {
-            const res = await fetch('/api/anchor', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ hash: latticeHash }) });
-            UI.notify("Success", "Hash Immortalized.");
-        } catch (e) { UI.notify("Mesh", "Hash logged to Mesh."); }
-    }
-};
-
-const SecurityGate = {
-    open(callback) { pendingAction = callback; pinBuffer = ""; document.getElementById('pin-gate-overlay').classList.remove('hidden'); },
-    close() { document.getElementById('pin-gate-overlay').classList.add('hidden'); pendingAction = null; },
-    verify(n) {
-        pinBuffer += n;
-        document.getElementById('pin-dots').innerText = "*".repeat(pinBuffer.length);
-        if(pinBuffer.length === 3) {
-            if(CryptoJS.SHA256(pinBuffer).toString() === CipherShield.PIN_HASH) {
-                const action = pendingAction; this.close(); if(action) action();
-            } else { 
-                pinBuffer = ""; document.getElementById('pin-dots').innerText = "WRONG"; 
-                setTimeout(()=>document.getElementById('pin-dots').innerText = "***", 800); 
-            }
-        }
+            const res = await fetch('/api/anchor', { 
+                method: 'POST', 
+                headers: { 'Content-Type': 'application/json' }, 
+                body: JSON.stringify({ hash: latticeHash }) 
+            });
+            UI.notify("Integrity", "Hash Anchored to BTC Chain.");
+        } catch (e) { UI.notify("Mesh", "Hash logged to Local Mesh."); }
     }
 };
 
@@ -306,7 +347,11 @@ const IdentityEngine = {
     },
     launch() {
         document.getElementById('nav-did-value').innerText = CipherShield.maskDID(userKeys.pub);
-        if(document.getElementById('profile-did-short')) document.getElementById('profile-did-short').innerText = userKeys.pub.substring(0, 15) + "...";
+        if(document.getElementById('profile-did-short')) {
+            document.getElementById('profile-did-short').innerText = userKeys.pub.substring(0, 15) + "...";
+            const mjShard = { owner: "MJRAWAT", rank: "GENESIS_PRIME", status: "ACTIVE", vm: "POLYGLOT_ENABLED" };
+            document.getElementById('raw-json-view').value = JSON.stringify(mjShard, null, 2);
+        }
         UI.tab('dashboard'); document.getElementById('nav').classList.remove('hidden'); document.getElementById('view-auth').classList.add('hidden');
         AnalyticsEngine.init(); TerminalEngine.init();
     },
@@ -314,26 +359,6 @@ const IdentityEngine = {
         document.getElementById('unlock-bal-btn').classList.add('hidden');
         document.getElementById('total-val').innerText = "100,000,000.50";
         LatticeIntegritySeal.triggerAnchoring();
-    }
-};
-
-const BridgeEngine = {
-    execute() { UI.notify("Bridge", "Tunnel Active."); }
-};
-
-const TerminalEngine = {
-    async init() {
-        const tbody = document.getElementById('terminal-tbody');
-        try {
-            const res = await fetch('https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=50&page=1&sparkline=false');
-            const data = await res.json();
-            tbody.innerHTML = data.map(coin => `
-                <tr>
-                    <td><b>${coin.symbol.toUpperCase()}</b></td><td>$${coin.current_price.toLocaleString()}</td>
-                    <td>H: $${coin.high_24h} | L: $${coin.low_24h}</td><td>${(coin.total_volume/1e6).toFixed(0)}M</td>
-                    <td class="${coin.price_change_percentage_24h > 0 ? 'trend-up' : 'trend-down'}">${coin.price_change_percentage_24h.toFixed(2)}%</td>
-                </tr>`).join('');
-        } catch(e) {}
     }
 };
 
@@ -350,6 +375,36 @@ const UI = {
         setTimeout(() => div.remove(), 4000); 
     },
     copyDID() { if(!userKeys) return; navigator.clipboard.writeText(userKeys.pub); this.notify("Vault", "Shard Copied."); }
+};
+
+const SecurityGate = {
+    open(callback) { pendingAction = callback; pinBuffer = ""; document.getElementById('pin-gate-overlay').classList.remove('hidden'); },
+    close() { document.getElementById('pin-gate-overlay').classList.add('hidden'); pendingAction = null; },
+    verify(n) {
+        pinBuffer += n;
+        document.getElementById('pin-dots').innerText = "*".repeat(pinBuffer.length);
+        if(pinBuffer.length === 3) {
+            if(CryptoJS.SHA256(pinBuffer).toString() === CipherShield.PIN_HASH) {
+                const action = pendingAction; this.close(); if(action) action();
+            } else { pinBuffer = ""; document.getElementById('pin-dots').innerText = "WRONG"; setTimeout(()=>document.getElementById('pin-dots').innerText = "***", 800); }
+        }
+    }
+};
+
+const TerminalEngine = {
+    async init() {
+        const tbody = document.getElementById('terminal-tbody');
+        try {
+            const res = await fetch('https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=50&page=1&sparkline=false');
+            const data = await res.json();
+            tbody.innerHTML = data.map(coin => `
+                <tr>
+                    <td><b>${coin.symbol.toUpperCase()}</b></td><td>$${coin.current_price.toLocaleString()}</td>
+                    <td>H: $${coin.high_24h} | L: $${coin.low_24h}</td><td>${(coin.total_volume/1e6).toFixed(0)}M</td>
+                    <td class="${coin.price_change_percentage_24h > 0 ? 'trend-up' : 'trend-down'}">${coin.price_change_percentage_24h.toFixed(2)}%</td>
+                </tr>`).join('');
+        } catch(e) {}
+    }
 };
 
 const AnalyticsEngine = { 

@@ -1,0 +1,9 @@
+:root { 
+    --primary: #ff8c00; --bg: #f8fafc; --sidebar: #ffffff; --card: #ffffff; 
+    --text: #1a1c1e; --muted: #64748b; --border: #e2e8f0;
+    --success: #10b981; --danger: #ef4444; --shadow: 0 4px 20px rgba(0,0,0,0.05);
+}
+/* ... बाकी का CSS जो आपने कोड में दिया है, यहाँ पेस्ट करें ... */
+.sov-textarea { width: 100%; padding: 14px; border-radius: 14px; border: 1px solid var(--border); 
+                background: #000; color: #10b981; font-family: 'Fira Code'; font-size: 13px; }
+.pulse-dot { width: 12px; height: 12px; background: var(--primary); border-radius: 50%; }
