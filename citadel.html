@@ -1,18 +1,20 @@
 <script>
-// --- 🌑 LAYER 1: SECURE CONSOLE CLOAKING ---
+// --- 🌑 सुरक्षा: कंसोल को साफ़ रखें ताकि कोई जासूसी न कर सके ---
 (function() {
-    const isProd = window.location.hostname.includes('render.com');
-    if (isProd) {
-        const noOp = () => {};
-        console.log = noOp; console.warn = noOp;
-        setInterval(() => console.clear(), 2000); // 🛡️ बाहरी जासूसी ब्लॉक
-    }
+    try {
+        const isProd = window.location.hostname.includes('render.com');
+        if (isProd) {
+            const noOp = () => {};
+            console.log = noOp; console.warn = noOp;
+            setInterval(() => console.clear(), 2000);
+        }
+    } catch(e) {}
 })();
 
-// --- 🔐 LAYER 2: SECURITY & ENCRYPTION ENGINE ---
+// --- 🔐 सिटाडेल का मुख्य इंजन ---
 const CipherShield = {
     MESH_SECRET: "SOV_LATTICE_INTEGRITY_SHIELD_99",
-    PIN_HASH: "a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3", // '123'
+    PIN_HASH: "a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3",
     encrypt(data) { return CryptoJS.AES.encrypt(JSON.stringify(data), this.MESH_SECRET).toString(); },
     decrypt(cipher) {
         try { 
