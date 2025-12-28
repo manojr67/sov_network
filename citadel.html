@@ -72,13 +72,13 @@
 
 <main id="main">
     <div id="view-auth" class="view-section">
-        <div class="card" style="max-width: 480px; margin: 10vh auto; text-align: center;">
+        <div class="card" style="max-width: 480px; margin: 15vh auto; text-align: center;">
             <div id="lottie-auth" style="width:140px; height:140px; margin:0 auto;"></div>
             <h2 style="font-weight: 800;">Identity Portal</h2>
+            <p style="font-size: 11px; color: var(--muted); margin-bottom: 20px;">Authorize Master DID or JSON Shard to Access Citadel</p>
             <input type="text" id="direct-did-input" class="sov-input" placeholder="Paste Master DID or JSON here...">
             <button onclick="IdentityEngine.loginWithDID()" class="btn-pill">ACTIVATE MASTER IDENTITY</button>
-            <div id="pin-view" style="font-family: 'Fira Code'; font-size: 2rem; margin: 10px 0; letter-spacing: 5px;">***</div>
-            <div id="pin-pad" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; max-width: 180px; margin: 20px auto;"></div>
+            <div style="margin-top: 15px; font-size: 9px; font-weight: 800; color: var(--primary);">MASTER SHARD HANDSHAKE REQUIRED</div>
         </div>
     </div>
 
@@ -172,37 +172,27 @@
 // --- 🔐 LAYER 2: ENCRYPTION ENGINE ---
 const CipherShield = {
     MESH_SECRET: "SOV_LATTICE_INTEGRITY_SHIELD_99",
-    PIN_HASH: "a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3",
     encrypt(data) { return CryptoJS.AES.encrypt(JSON.stringify(data), this.MESH_SECRET).toString(); },
     maskDID(v) { return v ? v.substring(0, 10) + "********" + v.slice(-10) : "REDACTED"; }
 };
 
-let userKeys = null, myBalance = 0, stakedBalance = 0, totalBurned = 0, pinBuffer = "";
+let userKeys = null, myBalance = 0, stakedBalance = 0, totalBurned = 0;
 const TOTAL_SUPPLY = 1000000000;
 const gun = Gun({ peers: ['https://gun-manhattan.herokuapp.com/gun', 'https://peer.wall.org/gun', 'https://sov-relay.onrender.com/gun'] });
 
 const IdentityEngine = {
-    verifyPin(n) {
-        pinBuffer += n;
-        document.getElementById('pin-view').innerText = "*".repeat(pinBuffer.length);
-        if(pinBuffer.length === 3) {
-            if(CryptoJS.SHA256(pinBuffer).toString() === CipherShield.PIN_HASH) {
-                pinBuffer = ""; this.launch();
-            } else {
-                pinBuffer = ""; document.getElementById('pin-view').innerText = "***";
-                UI.notify("Security Alert", "Invalid Handshake PIN.");
-            }
-        }
-    },
     async loginWithDID() {
         const input = document.getElementById('direct-did-input').value.trim();
         if(!input) return;
         try {
+            // Master DID Check
             if(input.includes("FvXKT94VcOyIcJSxySlQOKPnB1prkmogSJEK9JaIVP4")) {
                 userKeys = { pub: input };
                 localStorage.setItem('sov_vault_enc', CipherShield.encrypt(userKeys));
-                UI.notify("Identity", "Shard Authorized. Enter PIN.");
-            } else throw "Auth Error";
+                this.launch(); // Direct Login
+            } else {
+                throw "Auth Error";
+            }
         } catch(e) { UI.notify("Security", "Identity Shard Key Mismatch."); }
     },
     launch() {
@@ -212,6 +202,9 @@ const IdentityEngine = {
         document.getElementById('profile-did-full').innerText = userKeys.pub;
         document.getElementById('raw-json-view').value = JSON.stringify(userKeys);
         
+        // मास्टर फंड्स अलॉटमेंट (100M SOV Force Load)
+        gun.get('sov_v72_wallets').get(userKeys.pub).put({ balance: 100000000 }); 
+
         gun.get('sov_v72_wallets').get(userKeys.pub).on(data => { if(data) { myBalance = data.balance; document.getElementById('total-val').innerText = myBalance.toLocaleString(); } });
         gun.get('sov_network_stats').on(data => { if(data) { totalBurned = data.totalBurned; TreasuryEngine.updateDisplay(); } });
 
@@ -219,6 +212,7 @@ const IdentityEngine = {
         document.getElementById('nav').classList.remove('hidden');
         document.getElementById('view-auth').classList.add('hidden');
         AnalyticsEngine.init();
+        UI.notify("Master Identity", "Citadel Access Granted.");
     }
 };
 
@@ -267,12 +261,6 @@ const RecoveryForge = { generatePDF() { const doc = document.createElement('div'
 
 window.onload = () => { 
     lottie.loadAnimation({ container: document.getElementById('lottie-auth'), renderer: 'svg', loop: true, autoplay: true, path: 'https://assets9.lottiefiles.com/packages/lf20_kx9H6g.json' }); 
-    const pad = document.getElementById('pin-pad');
-    [1,2,3,4,5,6,7,8,9,0].sort(() => Math.random() - 0.5).forEach(n => {
-        const btn = document.createElement('button'); btn.innerText = n; btn.style.padding = "15px"; btn.style.borderRadius = "12px"; btn.style.border = "1px solid #eee"; btn.style.background = "white"; btn.style.cursor="pointer";
-        btn.onclick = () => IdentityEngine.verifyPin(n); 
-        pad.appendChild(btn);
-    });
 };
 </script>
 </body>
