@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>APEX SUPREME | Sovereign Master OS</title>
+    <title>CITADEL APEX | Sovereign Professional Master OS</title>
     
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;500;700;800&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
@@ -18,23 +18,48 @@
 
     <style>
         :root { 
-            --primary: #ff8c00; --bg: #fdfdfd; --card: rgba(255, 255, 255, 0.9); 
-            --text: #1a1c1e; --muted: #6b7280; --border: rgba(0,0,0,0.06);
-            --success: #10b981; --danger: #ef4444; --nav-bg: #ffffff;
-            --glow: 0 8px 32px rgba(255, 140, 0, 0.15);
+            --bg: #f8fafc; --sidebar: #ffffff; --card: #ffffff; 
+            --primary: #ff8c00; --secondary: #3b82f6; --text: #1a1c1e; 
+            --muted: #64748b; --border: #e2e8f0; --success: #10b981; --danger: #ef4444;
+            --shadow: 0 4px 20px rgba(0,0,0,0.05); --glow: 0 8px 32px rgba(255, 140, 0, 0.15);
         }
-        body { margin: 0; font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); color: var(--text); display: flex; height: 100vh; overflow: hidden; }
-        #nav { width: 250px; background: var(--nav-bg); backdrop-filter: blur(20px); border-right: 1px solid var(--border); padding: 1.5rem 1.2rem; display: flex; flex-direction: column; z-index: 100; overflow-y: auto; box-shadow: 4px 0 20px rgba(0,0,0,0.02); }
-        .did-container { background: #f9fafb; border: 1px solid var(--border); padding: 12px; border-radius: 16px; margin-bottom: 1.5rem; cursor: pointer; }
-        .did-label { font-size: 8px; font-weight: 800; color: var(--primary); display: block; margin-bottom: 4px; }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); color: var(--text); display: flex; height: 100vh; overflow: hidden; }
+
+        /* 🏢 Sidebar Professional UI */
+        #nav { width: 260px; background: var(--sidebar); border-right: 1px solid var(--border); padding: 1.5rem 1.2rem; display: flex; flex-direction: column; z-index: 100; overflow-y: auto; box-shadow: 2px 0 10px rgba(0,0,0,0.02); }
+        
+        .logo-box { display: flex; align-items: center; gap: 12px; margin-bottom: 2rem; }
+        .sov-logo { width: 40px; height: 40px; }
+
+        .did-container { background: #f9fafb; border: 1px solid var(--border); padding: 12px; border-radius: 16px; margin-bottom: 1.5rem; cursor: pointer; transition: 0.3s; }
+        .did-label { font-size: 8px; font-weight: 800; color: var(--primary); letter-spacing: 1px; display: block; margin-bottom: 4px; }
         .did-value { font-family: 'Fira Code', monospace; font-size: 9px; color: var(--muted); word-break: break-all; }
-        #nav a { color: var(--muted); text-decoration: none; padding: 14px 18px; border-radius: 14px; margin-bottom: 8px; font-weight: 600; display: flex; align-items: center; gap: 12px; }
-        #nav a.active { background: linear-gradient(135deg, var(--primary), #ffb347); color: white; box-shadow: var(--glow); }
-        #main { flex: 1; padding: 2.5rem; overflow-y: auto; background: radial-gradient(circle at top right, #fff5e6, #fdfdfd); }
-        .card { padding: 1.8rem; border-radius: 28px; border: 1px solid var(--border); background: var(--card); backdrop-filter: blur(15px); margin-bottom: 1.8rem; box-shadow: 0 10px 40px rgba(0,0,0,0.03); }
-        .sov-input { width: 100%; padding: 16px; border-radius: 16px; border: 1px solid var(--border); background: #f8f9fa; font-family: 'Fira Code'; font-size: 11px; margin-bottom: 15px; outline: none; }
-        .sov-textarea { width: 100%; height: 120px; font-size: 10px; padding: 15px; border-radius: 20px; border: 1px solid var(--border); background: #f8f9fa; font-family: 'Fira Code'; resize: none; margin-bottom: 15px; }
-        .btn-pill { background: linear-gradient(135deg, var(--primary), #ffb347); color: white; border: none; padding: 14px; border-radius: 16px; font-weight: 800; cursor: pointer; width: 100%; }
+
+        #nav a { color: var(--muted); text-decoration: none; padding: 14px 18px; border-radius: 14px; margin-bottom: 8px; font-weight: 600; display: flex; align-items: center; gap: 12px; transition: 0.3s; }
+        #nav a.active { background: #fff5e6; color: var(--primary); border: 1px solid #ffe6cc; }
+
+        /* 🚀 Main Page-Filled Layout */
+        #main { flex: 1; padding: 2rem; overflow-y: auto; display: flex; flex-direction: column; gap: 1.5rem; background: radial-gradient(circle at top right, #fff5e6, #f8fafc); }
+        
+        .grid-layout { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; }
+        .card { padding: 1.5rem; border-radius: 24px; border: 1px solid var(--border); background: var(--card); box-shadow: var(--shadow); position: relative; transition: 0.4s; }
+
+        .stat-label { font-size: 10px; font-weight: 800; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; }
+        .stat-val { font-size: 2.8rem; font-weight: 800; letter-spacing: -2px; color: var(--text); margin-top: 5px; }
+
+        .btn-pill { background: linear-gradient(135deg, var(--primary), #ffb347); color: white; border: none; padding: 16px; border-radius: 18px; font-weight: 800; cursor: pointer; width: 100%; transition: 0.3s; box-shadow: 0 10px 20px rgba(255, 140, 0, 0.2); }
+        .btn-pill:hover { transform: translateY(-2px); filter: brightness(1.05); }
+
+        .sov-input, .sov-textarea { width: 100%; padding: 14px; border-radius: 14px; border: 1px solid var(--border); background: #f8fafc; color: var(--text); outline: none; margin-bottom: 12px; font-family: 'Fira Code'; }
+        
+        .status-pill { padding: 4px 12px; border-radius: 20px; font-size: 10px; font-weight: 800; display: flex; align-items: center; gap: 6px; background: #ecfdf5; color: var(--success); }
+        .mesh-pulse { height: 4px; background: var(--primary); width: 0%; transition: 0.8s; border-radius: 10px; margin-top: 12px; }
+
+        #crypto-terminal-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px; }
+        .crypto-node { padding: 12px; border-radius: 18px; background: #f9fafb; border: 1px solid var(--border); text-align: center; }
+
         .hidden { display: none !important; }
     </style>
 </head>
@@ -43,85 +68,102 @@
 <div id="notif-container" style="position:fixed; top:20px; right:20px; z-index:9999;"></div>
 
 <nav id="nav" class="hidden">
+    <div class="logo-box">
+        <svg class="sov-logo" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="50" cy="50" r="45" fill="#ff8c00"/>
+            <path d="M50 20V80M30 50H70M35 35L65 65M65 35L35 65" stroke="white" stroke-width="8" stroke-linecap="round"/>
+            <circle cx="50" cy="50" r="15" fill="white"/>
+        </svg>
+        <div style="font-weight: 800; font-size: 1.2rem;">APEX OS</div>
+    </div>
+
     <div class="did-container" onclick="UI.copyDID()">
         <span class="did-label">MY SOVEREIGN DID <i class="bi bi-clipboard"></i></span>
         <div class="did-value" id="nav-did-value">Loading...</div>
     </div>
-    <div style="font-weight: 800; color: var(--primary); font-size: 1.2rem; margin-bottom: 2rem;"><i class="bi bi-shield-check-fill"></i> APEX PRO</div>
+
     <a href="#" class="active" onclick="UI.tab('dashboard', this)"><i class="bi bi-cpu"></i> Dashboard</a>
+    <a href="#" onclick="UI.tab('market', this)"><i class="bi bi-shop"></i> P2P Market</a>
     <a href="#" onclick="UI.tab('vaults', this)"><i class="bi bi-wallet2"></i> Terminal</a>
     <a href="#" onclick="UI.tab('profile', this)"><i class="bi bi-person-bounding-box"></i> Identity</a>
-    <div style="margin-top: auto; padding: 18px; border-radius: 18px; background: #fff5f5; color: #ef4444; cursor: pointer; text-align: center; font-weight: 700;" onclick="location.reload()">SYSTEM LOCK</div>
+    
+    <div style="margin-top: auto; padding: 18px; border-radius: 18px; background: #fff1f2; color: #e11d48; cursor: pointer; text-align: center; font-weight: 700;" onclick="location.reload()">SYSTEM LOCK</div>
 </nav>
 
 <main id="main">
     <div id="view-auth" class="view-section">
         <div class="card" style="max-width: 480px; margin: 10vh auto; text-align: center;">
             <div id="lottie-auth" style="width:140px; height:140px; margin:0 auto;"></div>
-            <h2 style="font-weight: 800;">Identity Portal</h2>
+            <h2 style="font-weight: 800; margin-bottom: 10px;">Identity Portal</h2>
+            <p style="color: var(--muted); font-size: 11px; margin-bottom: 25px;">पुरानी DID या JSON Shard का उपयोग करके मास्टर एक्सेस बहाल करें।</p>
             
-            <div id="auth-choice-box">
-                <p style="color: #6b7280; font-size: 11px; margin-bottom: 20px;">पुरानी DID या JSON Shard का उपयोग करके मास्टर एक्सेस बहाल करें।</p>
-                
-                <input type="text" id="direct-did-input" class="sov-input" placeholder="Paste Old DID or JSON here...">
-                <button onclick="IdentityEngine.loginWithDID()" class="btn-pill" style="margin-bottom: 20px;">ACTIVATE MASTER IDENTITY</button>
-                
-                <div style="margin: 15px 0; font-size: 10px; color: #cbd5e1;">OR USE PIN</div>
-                <div id="pin-pad" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; max-width: 180px; margin: 0 auto;"></div>
-            </div>
+            <input type="text" id="direct-did-input" class="sov-input" placeholder="Paste Old DID or JSON here...">
+            <button onclick="IdentityEngine.loginWithDID()" class="btn-pill" style="margin-bottom: 20px;">ACTIVATE MASTER IDENTITY</button>
+            
+            <div style="margin: 15px 0; font-size: 10px; color: #cbd5e1;">OR USE PIN (123)</div>
+            <div id="pin-pad" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; max-width: 180px; margin: 0 auto;"></div>
         </div>
     </div>
 
     <div id="view-dashboard" class="view-section hidden">
-        <div class="card">
-            <small style="color: var(--primary); font-weight: 800;">TOTAL ASSETS</small>
-            <div style="font-size: 3rem; font-weight: 800;"><span id="total-val">0.0000</span> <small style="font-size:1rem; color:var(--primary)">SOV</small></div>
-            <div id="ai-status" style="font-size: 10px; color: var(--success); font-weight: 700;">MESH ACTIVE</div>
+        <div class="grid-layout">
+            <div class="card" style="grid-column: span 2;">
+                <div style="display:flex; justify-content:space-between;">
+                    <div>
+                        <small class="stat-label">Total Asset Balance</small>
+                        <div class="stat-val"><span id="total-val">0.0000</span> <small style="font-size:1.2rem; color:var(--primary)">SOV</small></div>
+                    </div>
+                    <div class="status-pill"><i class="bi bi-broadcast"></i> MESH ACTIVE</div>
+                </div>
+            </div>
+            <div class="card" style="text-align:center; display:flex; flex-direction:column; justify-content:center;">
+                <h4 style="font-size:12px; font-weight:800; color:var(--success);">GOD MODE STATUS</h4>
+                <div id="ai-status" style="font-size:10px; font-weight:700; margin-top:5px;">SYNCHRONIZING...</div>
+            </div>
         </div>
-        <div class="analytics-grid">
-            <div class="card"><h4>Portfolio</h4><canvas id="portfolio-pi"></canvas></div>
-            <div class="card"><h4>Supply Share</h4><canvas id="supply-pi"></canvas></div>
+
+        <div class="grid-layout">
+            <div class="card" style="grid-column: span 2;">
+                <h4 style="font-size:14px; margin-bottom:1rem;">Portfolio Trajectory</h4>
+                <canvas id="growth-chart" style="height:250px;"></canvas>
+            </div>
+            <div class="card">
+                <h4 style="font-size:14px; margin-bottom:1rem;">Supply Share</h4>
+                <canvas id="supply-pi" style="height:250px;"></canvas>
+            </div>
         </div>
-        <div class="analytics-grid">
-            <div class="card"><h4>Market Price</h4><div id="price-chart" class="chart-container"></div></div>
-            <div class="card"><h4>Hashrate</h4><canvas id="hash-chart"></canvas></div>
+
+        <div class="grid-layout">
+            <div class="card">
+                <h4 style="font-size:14px; margin-bottom:1rem;">Lattice Shards</h4>
+                <canvas id="hash-chart" style="height:200px;"></canvas>
+            </div>
+            <div class="card" style="grid-column: span 2; display:flex; flex-direction:column; justify-content:center;">
+                <button onclick="CoinEngine.startMining()" class="btn-pill">BOOST MANUAL LATTICE</button>
+                <div id="mesh-pulse" class="mesh-pulse"></div>
+            </div>
         </div>
-        <button onclick="CoinEngine.startMining()" class="btn-pill">BOOST MANUAL LATTICE</button>
-        <div id="mesh-pulse" class="pulse-bar"></div>
     </div>
 
     <div id="view-vaults" class="view-section hidden"><div class="card"><h3>Terminal: Top 50</h3><div id="crypto-terminal-list"></div></div></div>
-
+    
     <div id="view-profile" class="view-section hidden">
         <div class="card">
             <h2>Identity Master</h2>
-            <button onclick="RecoveryForge.generatePDF()" class="btn-pill" style="background:#10b981;">DOWNLOAD RECOVERY PDF</button>
+            <button onclick="RecoveryForge.generatePDF()" class="btn-pill" style="background:#10b981; margin:20px 0;">DOWNLOAD RECOVERY PDF</button>
             <h4 style="margin-top:25px;">Secret JSON Shard</h4>
-            <textarea id="raw-json-view" class="sov-textarea" readonly></textarea>
+            <textarea id="raw-json-view" class="sov-textarea" style="height:200px;" readonly></textarea>
             <button onclick="UI.copyVault()" class="btn-pill" style="background:white; color:black; border:1px solid #ddd;">COPY JSON SHARD</button>
         </div>
     </div>
 </main>
 
 <script>
-let userKeys = null, sessionPIN = "", myBalance = 0;
+let userKeys = null, myBalance = 0, sessionPIN = "";
 const CORRECT_PIN = "123", PANIC_PIN = "999", MASTER_DID = "FvXKT94VcOyIcJSxySlQOKPnB1prkmogSJEK9JaIVP4.BZaHpUNfRNfLls4ntuLHcrj_4NcamS-UczxRSMQ56C8";
 let pinAttempt = "";
 
-// --- 👑 MASTER FIX ENGINE ---
-const CreatorEngine = {
-    initGenesis(did) {
-        if (did.includes(MASTER_DID)) {
-            myBalance = 100000000;
-            document.getElementById('total-val').innerText = myBalance.toFixed(4);
-            gun.get('sov_v72_wallets').get(did).put({ balance: 100000000 });
-            document.getElementById('ai-status').innerText = "GOD MODE ACTIVE";
-            UI.notify("Master", "10 Crore SOV Hard-Synced.");
-        }
-    }
-};
-
-// --- 🚀 IDENTITY & SCALABILITY ---
+// --- 🛡️ SECURITY & IDENTITY ENGINE ---
 const IdentityEngine = {
     async init(pin) {
         try {
@@ -133,36 +175,31 @@ const IdentityEngine = {
             this.launch();
         } catch(e) { UI.notify("Security", "Auth Failed."); }
     },
-
-    // 🏆 MASTER DID/JSON LOGIN FIX
     async loginWithDID() {
         const input = document.getElementById('direct-did-input').value.trim();
         if(!input) return;
-
-        window.gun = Gun({ peers: ['https://sov-relay.onrender.com/gun', 'https://gun-manhattan.herokuapp.com/gun', 'https://peer.wall.org/gun'], radisk: true, localStorage: true });
-
+        window.gun = Gun({ peers: ['https://gun-manhattan.herokuapp.com/gun', 'https://peer.wall.org/gun'], radisk: true, localStorage: true });
         try {
-            // Check if input is JSON or Plain DID
-            if(input.startsWith('{')) {
-                userKeys = JSON.parse(input);
-                localStorage.setItem('sov_vault_enc', CryptoJS.AES.encrypt(input, CORRECT_PIN).toString());
-            } else {
-                // If only DID is provided, we simulate the public key link
-                if(input.includes(MASTER_DID)) {
-                    userKeys = { pub: input };
-                } else {
-                    throw new Error("Invalid Master DID");
-                }
-            }
+            if(input.startsWith('{')) userKeys = JSON.parse(input);
+            else if(input.includes(MASTER_DID)) userKeys = { pub: input };
+            else throw new Error();
+            localStorage.setItem('sov_vault_enc', CryptoJS.AES.encrypt(JSON.stringify(userKeys), CORRECT_PIN).toString());
             this.launch();
-        } catch(e) { UI.notify("Error", "Invalid Identity Format."); }
+        } catch(e) { UI.notify("Error", "Invalid Identity."); }
     },
-
     launch() {
         if(userKeys && userKeys.pub) {
-            document.getElementById('nav-did-value').innerText = userKeys.pub;
+            document.getElementById('nav-did-value').innerText = userKeys.pub.substring(0, 30) + "...";
             document.getElementById('raw-json-view').value = JSON.stringify(userKeys);
-            CreatorEngine.initGenesis(userKeys.pub);
+            
+            // ✅ MASTER GENESIS RECOGNITION
+            if (userKeys.pub.includes(MASTER_DID)) {
+                myBalance = 100000000;
+                gun.get('sov_v72_wallets').get(userKeys.pub).put({ balance: 100000000 });
+                document.getElementById('ai-status').innerText = "GOD MODE ACTIVE";
+                UI.notify("Master", "10 Crore SOV Hard-Synced.");
+            }
+            
             CoinEngine.init(); UI.tab('dashboard');
             document.getElementById('nav').classList.remove('hidden');
             document.getElementById('view-auth').classList.add('hidden');
@@ -176,69 +213,61 @@ const CoinEngine = {
         gun.get('sov_v72_wallets').get(userKeys.pub).on(data => {
             if(data && data.balance !== undefined) {
                 myBalance = data.balance;
-                document.getElementById('total-val').innerText = myBalance.toFixed(4);
+                document.getElementById('total-val').innerText = myBalance.toLocaleString();
             }
         });
     },
     startMining() {
         document.getElementById('mesh-pulse').style.width = "100%";
-        myBalance += 0.001;
+        myBalance += 0.005;
         gun.get('sov_v72_wallets').get(userKeys.pub).put({ balance: myBalance });
         setTimeout(() => document.getElementById('mesh-pulse').style.width = "0%", 1000);
+    }
+};
+
+const AnalyticsEngine = {
+    init() {
+        new Chart(document.getElementById('growth-chart'), { type: 'line', data: { labels: ['H1', 'H2', 'H3', 'H4'], datasets: [{ data: [10, 15, 12, 18], borderColor: '#ff8c00', tension: 0.4, fill: true, backgroundColor: 'rgba(255, 140, 0, 0.05)' }] }, options: { plugins: { legend: { display: false } } } });
+        new Chart(document.getElementById('supply-pi'), { type: 'doughnut', data: { labels: ['Minted', 'Lock'], datasets: [{ data: [85, 15], backgroundColor: ['#ff8c00', '#f1f5f9'] }] }, options: { cutout: '80%' } });
+        new Chart(document.getElementById('hash-chart'), { type: 'bar', data: { labels: ['Node'], datasets: [{ data: [500], backgroundColor: '#3b82f6' }] }, options: { plugins: { legend: { display: false } } } });
+    }
+};
+
+const UI = {
+    tab(id, el) { 
+        document.querySelectorAll('.view-section').forEach(v => v.classList.add('hidden'));
+        document.getElementById('view-' + id).classList.remove('hidden');
+        if(el) { document.querySelectorAll('#nav a').forEach(n => n.classList.remove('active')); el.classList.add('active'); }
+        if(id === 'vaults') this.loadTerminal();
+    },
+    notify(t, m) { const div = document.createElement('div'); div.style.cssText = "background:white; border-left:4px solid var(--primary); padding:16px; margin-bottom:10px; font-size:12px; font-weight:700; box-shadow: var(--shadow);"; div.innerHTML = `<b>${t}:</b> ${m}`; document.getElementById('notif-container').appendChild(div); setTimeout(() => div.remove(), 3000); },
+    copyDID() { navigator.clipboard.writeText(userKeys.pub); UI.notify("Secure", "DID Copied."); },
+    copyVault() { navigator.clipboard.writeText(document.getElementById('raw-json-view').value); UI.notify("Secure", "JSON Copied."); },
+    async loadTerminal() {
+        const terminal = document.getElementById('crypto-terminal-list');
+        try {
+            const res = await fetch(`https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&per_page=50`);
+            const data = await res.json(); terminal.innerHTML = data.map(c => `<div class="crypto-node"><img src="${c.image}" width="20"><br><b>${c.symbol.toUpperCase()}</b><br>$${c.current_price.toLocaleString()}</div>`).join('');
+        } catch(e) { terminal.innerHTML = "Offline."; }
     }
 };
 
 const RecoveryForge = {
     generatePDF() {
         const doc = document.createElement('div');
-        doc.innerHTML = `<div style="padding:40px; border:5px solid #ff8c00;"><h1>APEX RECOVERY</h1><h3>DID:</h3><p>${userKeys.pub}</p><h3>JSON:</h3><p style="word-break:break-all; font-size:8px;">${JSON.stringify(userKeys)}</p></div>`;
+        doc.innerHTML = `<div style="padding:40px; border:5px solid #ff8c00;"><h1>APEX RECOVERY</h1><h3>DID:</h3><p>${userKeys.pub}</p><h3>VAULT:</h3><p style="word-break:break-all; font-size:8px;">${JSON.stringify(userKeys)}</p></div>`;
         html2pdf().from(doc).save();
     }
 };
 
-const MultiChainEngine = {
-    async syncChains() {
-        const terminal = document.getElementById('crypto-terminal-list');
-        try {
-            const res = await fetch(`https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&per_page=50`);
-            const data = await res.json(); terminal.innerHTML = "";
-            data.forEach(c => {
-                const div = document.createElement('div'); div.className = 'crypto-node';
-                div.innerHTML = `<img src="${c.image}" style="width:20px;"><br><b>${c.symbol.toUpperCase()}</b><br>$${c.current_price.toLocaleString()}`;
-                terminal.appendChild(div);
-            });
-        } catch(e) { terminal.innerHTML = "Offline."; }
-    }
+window.onload = () => { 
+    lottie.loadAnimation({ container: document.getElementById('lottie-auth'), renderer: 'svg', loop: true, autoplay: true, path: 'https://assets9.lottiefiles.com/packages/lf20_kx9H6g.json' }); 
+    const pad = document.getElementById('pin-pad');
+    [1,2,3,4,5,6,7,8,9,0].forEach(n => {
+        const btn = document.createElement('button'); btn.innerText = n; btn.style.padding = "15px"; btn.style.borderRadius = "12px"; btn.style.border = "1px solid #eee"; btn.style.background = "white"; 
+        btn.onclick = () => { pinAttempt += n; if (pinAttempt.length === 3) { if (pinAttempt === CORRECT_PIN) IdentityEngine.init(pinAttempt); else pinAttempt = ""; } }; pad.appendChild(btn);
+    });
 };
-
-const AnalyticsEngine = {
-    init() {
-        this.renderPriceChart();
-        new Chart(document.getElementById('portfolio-pi'), { type: 'pie', data: { labels: ['SOV', 'Other'], datasets: [{ data: [myBalance, 10], backgroundColor: ['#ff8c00', '#eee'] }] } });
-        new Chart(document.getElementById('supply-pi'), { type: 'doughnut', data: { labels: ['Circ', 'Lock'], datasets: [{ data: [85, 15], backgroundColor: ['#10b981', '#1a1c1e'] }] } });
-        new Chart(document.getElementById('hash-chart'), { type: 'bar', data: { labels: ['Node 1', 'You'], datasets: [{ label: 'H/s', data: [400, 500], backgroundColor: '#ff8c00' }] }, options: { maintainAspectRatio: false, scales: { y: { beginAtZero: true } } } });
-    },
-    renderPriceChart() {
-        const chart = LightweightCharts.createChart(document.getElementById('price-chart'), { layout: { backgroundColor: '#ffffff', textColor: '#333' } });
-        const series = chart.addLineSeries({ color: 'var(--primary)', lineWidth: 3 });
-        series.setData([{ time: '2025-12-24', value: 0.05 }, { time: '2025-12-28', value: 0.065 }]);
-    }
-};
-
-const UI = {
-    tab(id, el) { document.querySelectorAll('.view-section').forEach(v => v.classList.add('hidden')); document.getElementById('view-' + id).classList.remove('hidden'); if(el) { document.querySelectorAll('#nav a').forEach(n => n.classList.remove('active')); el.classList.add('active'); } if(id === 'vaults') MultiChainEngine.syncChains(); },
-    toggleLogin(m) { /* Reserved for future toggle logic if needed */ },
-    notify(t, m) { const div = document.createElement('div'); div.style.cssText = "background:white; border-left:4px solid var(--primary); padding:12px; margin-bottom:8px; font-size:11px; font-weight:700;"; div.innerHTML = `<b>${t}</b>: ${m}`; document.getElementById('notif-container').appendChild(div); setTimeout(() => div.remove(), 3000); },
-    copyDID() { navigator.clipboard.writeText(userKeys.pub); UI.notify("Secure", "DID Copied."); },
-    copyVault() { navigator.clipboard.writeText(document.getElementById('raw-json-view').value); UI.notify("Secure", "JSON Copied."); }
-};
-
-const CryptoGuard = { renderPad() { const pad = document.getElementById('pin-pad'); [1,2,3,4,5,6,7,8,9,0].forEach(n => { const btn = document.createElement('button'); btn.innerText = n; btn.className = 'pin-btn'; btn.style.padding = "15px"; btn.onclick = () => { pinAttempt += n; if (pinAttempt.length === 3) { if (pinAttempt === CORRECT_PIN) IdentityEngine.init(pinAttempt); else if (pinAttempt === PANIC_PIN) { localStorage.clear(); location.reload(); } else pinAttempt = ""; } }; pad.appendChild(btn); }); } };
-
-const ChatEngine = { init() {} };
-const SessionMonitor = { timeout: 300000, init() {} };
-
-window.onload = () => { AnimationEngine.init(); CryptoGuard.renderPad(); };
 </script>
 </body>
 </html>
