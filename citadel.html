@@ -1,3 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/gun/gun.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.9.6/lottie.min.js"></script>
+    </head>
+<body>
+    <div id="notif-container" style="position:fixed; top:20px; right:20px; z-index:9999;"></div>
+    <nav id="nav" class="hidden">...</nav>
+    <main id="main">...</main>
+
+    <script>
+        // 🛡️ सुरक्षा: अगर कोई कोड क्रैश हो, तो भी पेज ब्लैंक न रहे
+        window.onerror = function(msg) {
+            console.log("CRITICAL ERROR: " + msg);
+            return false;
+        };
+        // ... आपका पिछला पूरा सुरक्षित जावास्क्रिप्ट कोड ...
+    </script>
+</body>
+</html>
+
 <script>
 
 (function() {
