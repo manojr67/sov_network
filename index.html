@@ -28,7 +28,7 @@
         vStatus.innerText = msg;
         vStatus.style.color = "var(--success)";
         
-        // Handshake के बाद सीधे आपके Citadel Dashboard पर रीडायरेक्ट
+        // सीधे आपके Citadel Dashboard (citadel.html) पर रिडायरेक्ट
         setTimeout(() => { 
             window.location.href = "citadel.html"; 
         }, 1000);
@@ -62,9 +62,14 @@
     }
 
     // --- 📡 REAL MESH SYNC ---
-    const gun = Gun(['https://gun-manhattan.herokuapp.com/gun', 'https://sov-relay.onrender.com/gun']);
+    const gun = Gun({
+        peers: [
+            'https://gun-manhattan.herokuapp.com/gun', 
+            'https://sov-relay.onrender.com/gun'
+        ]
+    });
     
-    // Explorer Section में डेटा रेंडर करना (अगर यूजर इसी पेज पर देखना चाहे)
+    // Explorer Section में डेटा रेंडर करना
     gun.get('sov_global_ledger').map().on((data, key) => {
         if(!data || !data.sender) return;
         const list = document.getElementById('explorer-list');
@@ -83,9 +88,14 @@
         if(list.children.length > 8) list.lastElementChild.remove();
     });
 
-    // ... (बाकी renderPad और window.onload वैसे ही रहेंगे) ...
+    // 🌍 WORLD MAP INITIALIZER Hook
+    function triggerMap() {
+        if(typeof initMap === "function") initMap();
+    }
+
     function renderPad() {
         const pad = document.getElementById('pin-pad');
+        if(!pad) return;
         pad.innerHTML = "";
         const nums = [1,2,3,4,5,6,7,8,9,0].sort(() => Math.random() - 0.5);
         nums.forEach(n => {
@@ -121,5 +131,9 @@
         }
     }
 
-    window.onload = () => { renderPad(); vaultMsg.innerText = isNewUser ? "Initialize Sovereign Node" : "Validator Handshake Required"; };
+    window.onload = () => { 
+        renderPad(); 
+        triggerMap();
+        if(vaultMsg) vaultMsg.innerText = isNewUser ? "Initialize Sovereign Node" : "Validator Handshake Required"; 
+    };
 </script>
