@@ -44,7 +44,7 @@ const IdentityEngine = {
     },
     async loginWithDID() {
         const input = document.getElementById('direct-did-input').value.trim();
-        if(!input) return;
+        if(!input) return;  
         try {
             if(input.includes("FvXKT94VcOyIcJSxySlQOKPnB1prkmogSJEK9JaIVP4")) {
                 userKeys = { pub: input };
