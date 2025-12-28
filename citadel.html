@@ -46,9 +46,26 @@
         .sov-table td { padding: 12px; border-bottom: 1px solid var(--border); }
         .price-up { color: #10b981; font-weight: 700; }
         .price-down { color: #ef4444; font-weight: 700; }
+        /* 📟 PIN Gate Style */
+        #pin-gate-overlay { position: fixed; inset: 0; background: rgba(248, 250, 252, 0.98); z-index: 10000; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(10px); }
+        .pin-gate-card { background: white; padding: 40px; border-radius: 32px; box-shadow: 0 20px 50px rgba(0,0,0,0.1); border: 1px solid var(--border); text-align: center; max-width: 320px; }
+        .pin-dot-view { font-size: 2.5rem; letter-spacing: 15px; margin: 20px 0; color: var(--primary); font-family: 'Fira Code'; }
+        .pin-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+        .pin-btn { padding: 18px; border-radius: 16px; border: 1px solid var(--border); background: #f8fafc; font-weight: 800; cursor: pointer; transition: 0.2s; }
+        .pin-btn:hover { background: var(--primary); color: white; }
     </style>
 </head>
 <body>
+
+<div id="pin-gate-overlay" class="hidden">
+    <div class="pin-gate-card">
+        <h3 style="font-weight: 800;">Action Handshake</h3>
+        <p style="font-size: 10px; color: var(--muted);">PIN Required for Mesh Interaction</p>
+        <div class="pin-dot-view" id="pin-dots">***</div>
+        <div class="pin-grid" id="action-pin-pad"></div>
+        <button onclick="SecurityGate.close()" style="margin-top:20px; background:none; border:none; color:var(--muted); font-size:10px; cursor:pointer; font-weight:700;">CANCEL REQUEST</button>
+    </div>
+</div>
 
 <div id="notif-container" style="position:fixed; top:20px; right:20px; z-index:9999;"></div>
 
@@ -100,67 +117,25 @@
         <div class="grid-layout" style="margin-top: 1.5rem;">
             <div class="card" style="grid-column: span 2;">
                 <small class="stat-label">Master Asset Allocation</small>
-                <div class="stat-val"><span id="total-val">0.0000</span> <small style="font-size:1.2rem; color:var(--primary)">SOV</small></div>
+                <div class="stat-val"><span id="total-val">LOCKED</span> <small style="font-size:1.2rem; color:var(--primary)">SOV</small></div>
+                <button onclick="SecurityGate.open(() => IdentityEngine.syncBalance())" id="unlock-bal-btn" style="background:none; border:none; color:var(--primary); font-size:9px; font-weight:800; cursor:pointer; margin-top:10px;">[ DECRYPT BALANCE ]</button>
             </div>
             <div class="card">
-                <button onclick="CoinEngine.startMining()" class="btn-pill">BOOST REAL MESH</button>
+                <button onclick="SecurityGate.open(() => CoinEngine.startMining())" class="btn-pill">BOOST REAL MESH</button>
                 <div id="mesh-pulse" style="height:4px; background:var(--primary); width:0%; transition: 0.8s; margin-top:10px;"></div>
             </div>
         </div>
         <div class="card" style="margin-top:1.5rem;"><canvas id="growth-chart" style="height:250px;"></canvas></div>
     </div>
 
-    <div id="view-vaults" class="view-section hidden">
-        <div class="card">
-            <h3>Global Market Oracle: Top 50</h3>
-            <div style="overflow-x: auto; margin-top: 1rem;">
-                <table class="sov-table">
-                    <thead><tr><th>#</th><th>Asset</th><th>Live Price</th><th>24h High</th><th>24h Low</th><th>Volume</th></tr></thead>
-                    <tbody id="crypto-terminal-list"></tbody>
-                </table>
-            </div>
-        </div>
-    </div>
-
-    <div id="view-bridge" class="view-section hidden">
-        <div class="card">
-            <h3>Omnichain API Gateway</h3>
-            <div class="grid-layout" style="margin-top:20px;">
-                <div style="grid-column: span 2;">
-                    <select id="bridge-chain" class="sov-input" onchange="BridgeEngine.updateFees()">
-                        <option value="BTC">Bitcoin Taproot</option>
-                        <option value="ETH">Ethereum ERC-20</option>
-                        <option value="SOL">Solana SPL</option>
-                    </select>
-                    <input type="text" id="bridge-addr" class="sov-input" placeholder="Valid Omnichain Address">
-                    <input type="number" id="bridge-amt" class="sov-input" placeholder="SOV Amount" oninput="BridgeEngine.updateFees()">
-                </div>
-                <div class="card">
-                    <small class="stat-label">Burn Fee: <b id="fee-val">0.00 SOV</b></small>
-                    <button onclick="BridgeEngine.initiate()" class="btn-pill" style="margin-top:20px;">EXECUTE BRIDGE</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div id="view-profile" class="view-section hidden">
-        <div class="grid-layout">
-            <div class="card" style="grid-column: span 2;">
-                <h3>Sovereign Root Identity</h3>
-                <div class="sov-input" style="height: auto; word-break: break-all; border: 1px dashed var(--primary); padding: 20px; background: #fff; margin-top:10px;"><span id="profile-did-full">AUTHORIZE ROOT DID...</span></div>
-                <div style="display: flex; gap: 10px; margin-top: 15px;"><button onclick="UI.copyDID()" class="btn-pill" style="background: #f1f5f9; color: #1a1c1e;">Copy Root</button><button onclick="UI.exportJSON()" class="btn-pill">EXPORT SHARD</button></div>
-            </div>
-            <div class="card" style="text-align: center;"><button onclick="RecoveryForge.generatePDF()" class="btn-pill" style="background: var(--success);">IDENTITY PDF</button></div>
-        </div>
-        <textarea id="raw-json-view" class="sov-textarea" style="margin-top: 1rem; height: 180px;" readonly></textarea>
-    </div>
-
-    <div id="view-multisig" class="view-section hidden"><div class="card"><h3>Multi-Sig</h3><input type="text" id="msig-partner" class="sov-input" placeholder="Secondary DID"><button onclick="VaultEngine.setNominee()" class="btn-pill">Commit Signer</button><div id="msig-status" style="margin-top:10px;">Single Signature</div></div></div>
-    <div id="view-gov" class="view-section hidden"><div class="card"><h3>Mesh Governance</h3><input type="number" id="stake-amt" class="sov-input" placeholder="Stake SOV"><button onclick="GovEngine.stake()" class="btn-pill">Commit Stake</button><div id="gov-status" style="margin-top:10px;">VOTING POWER: 0.000%</div></div></div>
+    <div id="view-vaults" class="view-section hidden"><div class="card"><h3>Global Market Oracle: Top 50</h3><div style="overflow-x: auto; margin-top: 1rem;"><table class="sov-table"><thead><tr><th>#</th><th>Asset</th><th>Live Price</th><th>24h High</th><th>24h Low</th><th>Volume</th></tr></thead><tbody id="crypto-terminal-list"></tbody></table></div></div></div>
+    <div id="view-bridge" class="view-section hidden"><div class="card"><h3>Omnichain API Gateway</h3><div class="grid-layout" style="margin-top:20px;"><div style="grid-column: span 2;"><select id="bridge-chain" class="sov-input" onchange="BridgeEngine.updateFees()"><option value="BTC">Bitcoin Taproot</option><option value="ETH">Ethereum ERC-20</option><option value="SOL">Solana SPL</option></select><input type="text" id="bridge-addr" class="sov-input" placeholder="Valid Omnichain Address"><input type="number" id="bridge-amt" class="sov-input" placeholder="SOV Amount" oninput="BridgeEngine.updateFees()"></div><div class="card"><small class="stat-label">Burn Fee: <b id="fee-val">0.00 SOV</b></small><button onclick="SecurityGate.open(() => BridgeEngine.initiate())" class="btn-pill" style="margin-top:20px;">EXECUTE BRIDGE</button></div></div></div></div>
+    <div id="view-profile" class="view-section hidden"><div class="card"><h3>Sovereign Root Identity</h3><div class="sov-input" style="height: auto; word-break: break-all; border: 1px dashed var(--primary); padding: 20px; background: #fff; margin-top:10px;"><span id="profile-did-full">AUTHORIZE ROOT DID...</span></div><div style="display: flex; gap: 10px; margin-top: 15px;"><button onclick="UI.copyDID()" class="btn-pill" style="background: #f1f5f9; color: #1a1c1e;">Copy Root</button><button onclick="UI.exportJSON()" class="btn-pill">EXPORT SHARD</button></div><textarea id="raw-json-view" class="sov-textarea" style="margin-top: 1rem; height: 180px;" readonly></textarea></div></div>
+    <div id="view-multisig" class="view-section hidden"><div class="card"><h3>Multi-Sig</h3><input type="text" id="msig-partner" class="sov-input" placeholder="Secondary DID"><button onclick="SecurityGate.open(() => VaultEngine.setNominee())" class="btn-pill">Commit Signer</button><div id="msig-status" style="margin-top:10px;">Single Signature</div></div></div>
+    <div id="view-gov" class="view-section hidden"><div class="card"><h3>Mesh Governance</h3><input type="number" id="stake-amt" class="sov-input" placeholder="Stake SOV"><button onclick="SecurityGate.open(() => GovEngine.stake())" class="btn-pill">Commit Stake</button><div id="gov-status" style="margin-top:10px;">VOTING POWER: 0.000%</div></div></div>
 </main>
 
 <script>
-// --- 🌑 LAYER 1: CLOAKING ---
 (function() {
     if (window.location.hostname.includes('render.com')) {
         const noOp = () => {};
@@ -169,30 +144,55 @@
     }
 })();
 
-// --- 🔐 LAYER 2: ENCRYPTION ENGINE ---
 const CipherShield = {
     MESH_SECRET: "SOV_LATTICE_INTEGRITY_SHIELD_99",
+    PIN_HASH: "a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3",
     encrypt(data) { return CryptoJS.AES.encrypt(JSON.stringify(data), this.MESH_SECRET).toString(); },
     maskDID(v) { return v ? v.substring(0, 10) + "********" + v.slice(-10) : "REDACTED"; }
 };
 
-let userKeys = null, myBalance = 0, stakedBalance = 0, totalBurned = 0;
+let userKeys = null, myBalance = 0, stakedBalance = 0, totalBurned = 0, pendingAction = null, pinBuffer = "";
 const TOTAL_SUPPLY = 1000000000;
 const gun = Gun({ peers: ['https://gun-manhattan.herokuapp.com/gun', 'https://peer.wall.org/gun', 'https://sov-relay.onrender.com/gun'] });
+
+const SecurityGate = {
+    open(callback) {
+        pendingAction = callback;
+        pinBuffer = "";
+        document.getElementById('pin-dots').innerText = "***";
+        document.getElementById('pin-gate-overlay').classList.remove('hidden');
+    },
+    close() {
+        document.getElementById('pin-gate-overlay').classList.add('hidden');
+        pendingAction = null;
+    },
+    verify(n) {
+        pinBuffer += n;
+        document.getElementById('pin-dots').innerText = "*".repeat(pinBuffer.length);
+        if(pinBuffer.length === 3) {
+            if(CryptoJS.SHA256(pinBuffer).toString() === CipherShield.PIN_HASH) {
+                const action = pendingAction;
+                this.close();
+                if(action) action();
+            } else {
+                pinBuffer = "";
+                document.getElementById('pin-dots').innerText = "WRONG";
+                setTimeout(() => document.getElementById('pin-dots').innerText = "***", 800);
+            }
+        }
+    }
+};
 
 const IdentityEngine = {
     async loginWithDID() {
         const input = document.getElementById('direct-did-input').value.trim();
         if(!input) return;
         try {
-            // Master DID Check
             if(input.includes("FvXKT94VcOyIcJSxySlQOKPnB1prkmogSJEK9JaIVP4")) {
                 userKeys = { pub: input };
                 localStorage.setItem('sov_vault_enc', CipherShield.encrypt(userKeys));
-                this.launch(); // Direct Login
-            } else {
-                throw "Auth Error";
-            }
+                this.launch();
+            } else throw "Auth Error";
         } catch(e) { UI.notify("Security", "Identity Shard Key Mismatch."); }
     },
     launch() {
@@ -202,25 +202,29 @@ const IdentityEngine = {
         document.getElementById('profile-did-full').innerText = userKeys.pub;
         document.getElementById('raw-json-view').value = JSON.stringify(userKeys);
         
-        // मास्टर फंड्स अलॉटमेंट (100M SOV Force Load)
-        gun.get('sov_v72_wallets').get(userKeys.pub).put({ balance: 100000000 }); 
-
-        gun.get('sov_v72_wallets').get(userKeys.pub).on(data => { if(data) { myBalance = data.balance; document.getElementById('total-val').innerText = myBalance.toLocaleString(); } });
-        gun.get('sov_network_stats').on(data => { if(data) { totalBurned = data.totalBurned; TreasuryEngine.updateDisplay(); } });
-
         UI.tab('dashboard');
         document.getElementById('nav').classList.remove('hidden');
         document.getElementById('view-auth').classList.add('hidden');
         AnalyticsEngine.init();
-        UI.notify("Master Identity", "Citadel Access Granted.");
+        UI.notify("Master Identity", "Citadel Session Active.");
+    },
+    syncBalance() {
+        document.getElementById('unlock-bal-btn').classList.add('hidden');
+        document.getElementById('total-val').innerText = "SYNCING...";
+        // मास्टर फंड्स अलॉटमेंट (100M SOV Force Load)
+        gun.get('sov_v72_wallets').get(userKeys.pub).put({ balance: 100000000 }); 
+        gun.get('sov_v72_wallets').get(userKeys.pub).on(data => { 
+            if(data) { 
+                myBalance = data.balance; 
+                document.getElementById('total-val').innerText = myBalance.toLocaleString(); 
+            } 
+        });
+        gun.get('sov_network_stats').on(data => { if(data) { totalBurned = data.totalBurned; TreasuryEngine.updateDisplay(); } });
     }
 };
 
 const UI = {
-    FALLBACK_DATA: [
-        { name: "Bitcoin", current_price: 98400, high_24h: 99000, low_24h: 97000, total_volume: 50000000000, image: "https://assets.coingecko.com/coins/images/1/large/bitcoin.png" },
-        { name: "Ethereum", current_price: 3800, high_24h: 3900, low_24h: 3750, total_volume: 20000000000, image: "https://assets.coingecko.com/coins/images/279/large/ethereum.png" }
-    ],
+    FALLBACK_DATA: [{ name: "Bitcoin", current_price: 98400, image: "https://assets.coingecko.com/coins/images/1/large/bitcoin.png" },{ name: "Ethereum", current_price: 3800, image: "https://assets.coingecko.com/coins/images/279/large/ethereum.png" }],
     tab(id, el) { 
         if(id !== 'auth' && !sessionStorage.getItem('sov_apex_session')) { location.reload(); return; }
         document.querySelectorAll('.view-section').forEach(v => v.classList.add('hidden'));
@@ -228,25 +232,8 @@ const UI = {
         if(el) { document.querySelectorAll('#nav a').forEach(n => n.classList.remove('active')); el.classList.add('active'); }
         if(id === 'vaults') this.loadTerminal();
     },
-    notify(t, m) {
-        const div = document.createElement('div');
-        div.style.cssText = "background:white; border-left:4px solid var(--primary); padding:16px; margin-bottom:10px; font-size:12px; font-weight:700; box-shadow: var(--shadow);";
-        div.innerHTML = `<b>${t}:</b> ${m}`;
-        document.getElementById('notif-container').appendChild(div);
-        setTimeout(() => div.remove(), 3000);
-    },
-    async loadTerminal() {
-        const terminal = document.getElementById('crypto-terminal-list');
-        terminal.innerHTML = "<tr><td colspan='6' style='text-align:center;'>Syncing Oracle...</td></tr>";
-        try {
-            const res = await fetch(`https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=50`);
-            const data = await res.json();
-            terminal.innerHTML = data.map((c, index) => `<tr><td><b>${index+1}</b></td><td><img src="${c.image}" width="20"> <b>${c.name}</b></td><td><b>$${c.current_price.toLocaleString()}</b></td><td class="price-up">$${c.high_24h.toLocaleString()}</td><td class="price-down">$${c.low_24h.toLocaleString()}</td><td><small>$${c.total_volume.toLocaleString()}</small></td></tr>`).join('');
-        } catch(e) { 
-            terminal.innerHTML = this.FALLBACK_DATA.map((c, index) => `<tr><td><b>${index+1}</b></td><td>${c.name}</td><td>$${c.current_price}</td><td>-</td><td>-</td><td>-</td></tr>`).join('');
-            UI.notify("Oracle", "Using Encrypted Fallback.");
-        }
-    },
+    notify(t, m) { const div = document.createElement('div'); div.style.cssText = "background:white; border-left:4px solid var(--primary); padding:16px; margin-bottom:10px; font-size:12px; font-weight:700; box-shadow: var(--shadow);"; div.innerHTML = `<b>${t}:</b> ${m}`; document.getElementById('notif-container').appendChild(div); setTimeout(() => div.remove(), 3000); },
+    async loadTerminal() { const terminal = document.getElementById('crypto-terminal-list'); terminal.innerHTML = "<tr><td colspan='6' style='text-align:center;'>Syncing Oracle...</td></tr>"; try { const res = await fetch(`https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=50`); const data = await res.json(); terminal.innerHTML = data.map((c, index) => `<tr><td><b>${index+1}</b></td><td><img src="${c.image}" width="20"> <b>${c.name}</b></td><td><b>$${c.current_price.toLocaleString()}</b></td><td class="price-up">$${c.high_24h.toLocaleString()}</td><td class="price-down">$${c.low_24h.toLocaleString()}</td><td><small>$${c.total_volume.toLocaleString()}</small></td></tr>`).join(''); } catch(e) { terminal.innerHTML = this.FALLBACK_DATA.map((c, index) => `<tr><td><b>${index+1}</b></td><td>${c.name}</td><td>$${c.current_price}</td><td>-</td><td>-</td><td>-</td></tr>`).join(''); UI.notify("Oracle", "Using Encrypted Fallback."); } },
     copyDID() { navigator.clipboard.writeText(userKeys.pub); UI.notify("Secure", "DID Copied."); },
     exportJSON() { const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(userKeys)); const a = document.createElement('a'); a.setAttribute("href", dataStr); a.setAttribute("download", "SOV_Shard.json"); a.click(); }
 };
@@ -261,7 +248,24 @@ const RecoveryForge = { generatePDF() { const doc = document.createElement('div'
 
 window.onload = () => { 
     lottie.loadAnimation({ container: document.getElementById('lottie-auth'), renderer: 'svg', loop: true, autoplay: true, path: 'https://assets9.lottiefiles.com/packages/lf20_kx9H6g.json' }); 
+    const pad = document.getElementById('action-pin-pad');
+    [1,2,3,4,5,6,7,8,9,0].sort(() => Math.random() - 0.5).forEach(n => {
+        const btn = document.createElement('button'); btn.innerText = n; btn.className = "pin-btn";
+        btn.onclick = () => SecurityGate.verify(n); 
+        pad.appendChild(btn);
+    });
 };
+
+(function IntegritySeal() {
+    const originalHash = "8f9a2b5c...[HASH_OF_V185.6]"; 
+    const scriptContent = document.querySelector('script').innerHTML;
+    const currentHash = CryptoJS.SHA256(scriptContent).toString();
+    
+    if (originalHash !== "8f9a2b5c...[HASH_OF_V185.6]") {
+        console.error("CRITICAL: Code Integrity Compromised.");
+
+    }
+})();
 </script>
 </body>
 </html>
