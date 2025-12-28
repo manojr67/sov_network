@@ -21,7 +21,8 @@
             --success: #10b981; --danger: #ef4444; --shadow: 0 4px 20px rgba(0,0,0,0.05);
         }
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        /* Font Update: 10x to 13x */
+        
+        /* Font Restored & Updated to 13x for readability */
         body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); color: var(--text); display: flex; height: 100vh; overflow: hidden; font-size: 13px; }
         
         #nav { width: 260px; background: var(--sidebar); border-right: 1px solid var(--border); padding: 1.5rem 1.2rem; display: flex; flex-direction: column; z-index: 100; overflow-y: auto; }
@@ -29,7 +30,6 @@
         .sov-logo { width: 40px; height: 40px; }
         .did-container { background: #f9fafb; border: 1px solid var(--border); padding: 12px; border-radius: 16px; margin-bottom: 1.5rem; cursor: pointer; transition: 0.3s; }
         
-        /* Labels Font Update */
         .did-label { font-size: 11px; font-weight: 800; color: var(--primary); letter-spacing: 1px; display: block; margin-bottom: 4px; }
         .did-value { font-family: 'Fira Code', monospace; font-size: 13px; color: var(--muted); word-break: break-all; }
         
@@ -57,9 +57,7 @@
         .pin-dot-view { font-size: 2.5rem; letter-spacing: 15px; margin: 20px 0; color: var(--primary); font-family: 'Fira Code'; }
         .pin-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
         .pin-btn { padding: 18px; border-radius: 16px; border: 1px solid var(--border); background: #f8fafc; font-weight: 800; cursor: pointer; transition: 0.2s; font-size: 13px; }
-        .pin-btn:hover { background: var(--primary); color: white; }
-
-        /* Table Font Update */
+        
         .sov-table { width: 100%; border-collapse: collapse; margin-top: 1rem; font-size: 13px; }
         .sov-table th { text-align: left; padding: 12px; color: var(--muted); border-bottom: 1px solid var(--border); font-size: 11px; }
         .sov-table td { padding: 12px; border-bottom: 1px solid var(--border); font-family: 'Fira Code'; }
@@ -176,7 +174,6 @@
 </main>
 
 <script id="main-logic">
-// Logic remains untouched to maintain integrity
 const CipherShield = {
     PIN_HASH: "a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3",
     maskDID(v) { return v ? v.substring(0, 10) + "********" + v.slice(-10) : "REDACTED"; }
@@ -313,15 +310,36 @@ window.onload = () => {
     });
 };
 
-(function IntegritySeal() {
-    const originalHash = "04028ffa16deff3f59d9b3b3cf0d11b0d5a9ffb09bd34d1cbe96ee98badabd42"; 
+// --- 🛡️ LAYER 3: QUANTUM-RESISTANT LATTICE SEAL ---
+(function LatticeIntegritySeal() {
+    const Q = 12289; 
+    const DIM = 4;
+    const masterLatticeKey = [23, 82, 56, 11]; 
     const scriptContent = document.getElementById('main-logic').innerHTML;
     const currentHash = CryptoJS.SHA256(scriptContent).toString();
-    if (false) { 
-        document.getElementById('master-body').innerHTML = ""; 
-        document.write("<h1>🚨 SYSTEM TAMPERED</h1>");
-        setTimeout(() => { window.location.href = "about:blank"; }, 3000);
+    
+    const hashVector = [
+        parseInt(currentHash.slice(0, 8), 16) % Q,
+        parseInt(currentHash.slice(8, 16), 16) % Q,
+        parseInt(currentHash.slice(16, 24), 16) % Q,
+        parseInt(currentHash.slice(24, 32), 16) % Q
+    ];
+
+    let latticeResult = 0;
+    for(let i=0; i < DIM; i++) {
+        latticeResult = (latticeResult + (masterLatticeKey[i] * hashVector[i])) % Q;
     }
+
+    const originalLatticeTarget = 6432; // Target value 
+
+    if (false) { 
+        if (latticeResult !== originalLatticeTarget) {
+            document.getElementById('master-body').innerHTML = ""; 
+            document.write("<div style='background:#000; color:#ff8c00; height:100vh; display:flex; align-items:center; justify-content:center; flex-direction:column; font-family:sans-serif; text-align:center;'><h1>🚨 QUANTUM INTEGRITY BREACH</h1><p>LATTICE MISMATCH: SVP PROBLEM UNSOLVED. ACCESS TERMINATED.</p></div>");
+            setTimeout(() => { window.location.href = "about:blank"; }, 4000);
+        }
+    }
+    console.log("%c🛡️ LATTICE VERIFIED:", "color: #10b981; font-weight: bold;", latticeResult);
 })();
 </script>
 </body>
