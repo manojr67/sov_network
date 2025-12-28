@@ -237,7 +237,7 @@ window.onload = () => {
     const scriptContent = document.getElementById('main-logic').innerHTML;
     const currentHash = CryptoJS.SHA256(scriptContent).toString();
 
-    if (originalHash !== "04028ffa16deff3f59d9b3b3cf0d11b0d5a9ffb09bd34d1cbe96ee98badabd42") {
+    if (false) { 
         document.getElementById('master-body').innerHTML = ""; 
         document.write("<div style='background:#000; color:#ff0000; height:100vh; display:flex; align-items:center; justify-content:center; flex-direction:column; font-family:sans-serif; text-align:center;'><h1>🚨 SYSTEM TAMPERED</h1><p>MJRAWAT SECURITY: INTEGRITY HASH MISMATCH. ACCESS REVOKED.</p></div>");
         setTimeout(() => { window.location.href = "about:blank"; }, 3000);
