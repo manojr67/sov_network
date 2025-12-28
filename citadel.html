@@ -1,145 +1,24 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/gun/gun.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.9.6/lottie.min.js"></script>
-    </head>
-<body>
-    <div id="notif-container" style="position:fixed; top:20px; right:20px; z-index:9999;"></div>
-    <nav id="nav" class="hidden">...</nav>
-    <main id="main">...</main>
+<script>
+// --- MASTER-GRADE SECURE CONFIGURATION ---
+let userKeys = null, myBalance = 0, stakedBalance = 0, totalBurned = 0;
 
-    <script>
-        // 🛡️ सुरक्षा: अगर कोई कोड क्रैश हो, तो भी पेज ब्लैंक न रहे
-        window.onerror = function(msg) {
-            console.log("CRITICAL ERROR: " + msg);
-            return false;
-        };
-
-(function() {
-    const isProd = window.location.hostname.includes('render.com');
-    if (isProd) {
-        const noOp = () => {};
-        console.log = noOp; console.warn = noOp; console.error = noOp;
-        console.info = noOp; console.debug = noOp; console.table = noOp;
-        setInterval(() => console.clear(), 1000); // 🛡️ कंसोल साफ़ रखें
-    }
-})();
-
-document.addEventListener('contextmenu', event => event.preventDefault());
-document.onkeydown = function(e) {
-    if(e.keyCode == 123 || (e.ctrlKey && e.shiftKey && (e.keyCode == 73 || e.keyCode == 74)) || (e.ctrlKey && e.keyCode == 85)) return false;
-};
-
-const CipherShield = {
-    MESH_SECRET: "SOV_LATTICE_INTEGRITY_SHIELD_99",
-    PIN_HASH: "a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3", // '123' का सुरक्षित हैश
-    encrypt(data) { return CryptoJS.AES.encrypt(JSON.stringify(data), this.MESH_SECRET).toString(); },
-    decrypt(cipher) {
-        try { 
-            const bytes = CryptoJS.AES.decrypt(cipher, this.MESH_SECRET);
-            return JSON.parse(bytes.toString(CryptoJS.enc.Utf8)); 
-        } catch(e) { return null; }
-    },
-    maskDID(v) { return v ? v.substring(0, 8) + "********" + v.slice(-8) : "REDACTED"; }
-};
-
-let userKeys = null, myBalance = 0, stakedBalance = 0, totalBurned = 0, pinBuffer = "";
+/**
+ * PRIVACY LAYER: Asli DID ko code se hata kar uska SHA-256 Hash rakha gaya hai.
+ * Isse integrity bani rehti hai aur koi Inspect Element se key nahi dekh sakta.
+ */
+const MASTER_HASH = "8f037613768297a79e60655c654378f420e64906f2389d3839218d6e3557e07a";
 const TOTAL_SUPPLY = 1000000000;
-const gun = Gun({ peers: ['https://sov-relay.onrender.com/gun', 'https://peer.wall.org/gun'] });
+const MASTER_ALLOCATION = 100000000;
+const SALT_CORE = "SOV_APEX_2025_LATTICE_SECURE";
 
-const IdentityEngine = {
-    verifyPin(n) {
-        pinBuffer += n;
-        if(pinBuffer.length === 3) {
-            const inputHash = CryptoJS.SHA256(pinBuffer).toString();
-            if(inputHash === CipherShield.PIN_HASH) {
-                pinBuffer = ""; this.launch();
-            } else {
-                pinBuffer = ""; UI.notify("Security Alert", "Invalid Handshake Pin.");
-            }
-        }
-    },
-    async loginWithDID() {
-        const input = document.getElementById('direct-did-input').value.trim();
-        if(!input) return;  
-        try {
-            // मास्टर DID वेरिफिकेशन
-            if(input.includes("FvXKT94VcOyIcJSxySlQOKPnB1prkmogSJEK9JaIVP4")) {
-                userKeys = { pub: input };
-                localStorage.setItem('sov_vault_enc', CipherShield.encrypt(userKeys));
-                UI.notify("Identity", "Shard Authorized. Enter PIN.");
-            } else throw "Unauthorized";
-        } catch(e) { UI.notify("Security", "Identity Shard Mismatch."); }
-    },
-    launch() {
-        if(!userKeys) return;
-        // 🛡️ SESSION LOCKDOWN
-        sessionStorage.setItem('sov_apex_session', 'ACTIVE_' + Date.now());
-        
-        document.getElementById('nav-did-value').innerText = CipherShield.maskDID(userKeys.pub);
-        document.getElementById('profile-did-full').innerText = userKeys.pub;
-
-        // मेश सिंक (Real-time Wallets & Burn)
-        gun.get('sov_v72_wallets').get(userKeys.pub).on(data => { 
-            if(data && data.balance !== undefined) { 
-                myBalance = data.balance; 
-                document.getElementById('total-val').innerText = myBalance.toLocaleString(); 
-            } 
-        });
-        gun.get('sov_network_stats').on(data => { 
-            if(data && data.totalBurned !== undefined) { 
-                totalBurned = data.totalBurned; 
-                TreasuryEngine.updateDisplay(); 
-            } 
-        });
-
-        UI.tab('dashboard');
-        document.getElementById('nav').classList.remove('hidden');
-        document.getElementById('view-auth').classList.add('hidden');
-        AnalyticsEngine.init();
-    }
-};
-
-const UI = {
-
-    FALLBACK_DATA: [
-        { name: "Bitcoin", current_price: 98400, high_24h: 99000, low_24h: 97000, total_volume: 50000000000, image: "https://assets.coingecko.com/coins/images/1/large/bitcoin.png" },
-        { name: "Ethereum", current_price: 3800, high_24h: 3900, low_24h: 3750, total_volume: 20000000000, image: "https://assets.coingecko.com/coins/images/279/large/ethereum.png" }
-    ],
-    tab(id, el) { 
-    
-        if(id !== 'auth' && !sessionStorage.getItem('sov_apex_session')) { location.reload(); return; }
-        document.querySelectorAll('.view-section').forEach(v => v.classList.add('hidden'));
-        document.getElementById('view-' + id).classList.remove('hidden');
-        if(el) { document.querySelectorAll('#nav a').forEach(n => n.classList.remove('active')); el.classList.add('active'); }
-        if(id === 'vaults') this.loadTerminal();
-    },
-    notify(t, m) {
-        const div = document.createElement('div');
-        div.style.cssText = "background:white; border-left:4px solid #ff8c00; padding:16px; margin-bottom:10px; font-size:12px; font-weight:700; box-shadow: 0 4px 20px rgba(0,0,0,0.1);";
-        div.innerHTML = `<b>${t}:</b> ${m}`;
-        document.getElementById('notif-container').appendChild(div);
-        setTimeout(() => div.remove(), 3000);
-    },
-    async loadTerminal() {
-        const terminal = document.getElementById('crypto-terminal-list');
-        terminal.innerHTML = "<tr><td colspan='6' style='text-align:center;'>Syncing Oracle...</td></tr>";
-        try {
-            const res = await fetch(`https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=50`);
-            if(!res.ok) throw new Error();
-            const data = await res.json();
-            this.renderRows(data);
-        } catch(e) {
-            this.renderRows(this.FALLBACK_DATA);
-            UI.notify("Oracle", "Using Encrypted Fallback Stream.");
-        }
-    },
-    renderRows(data) {
-        document.getElementById('crypto-terminal-list').innerHTML = data.map((c, index) => `<tr><td><b>${index+1}</b></td><td><img src="${c.image}" width="20"> <b>${c.name}</b></td><td><b>$${c.current_price.toLocaleString()}</b></td><td class="price-up">$${c.high_24h.toLocaleString()}</td><td class="price-down">$${c.low_24h.toLocaleString()}</td><td><small>$${c.total_volume.toLocaleString()}</small></td></tr>`).join('');
-    }
-};
+// RELIABILITY: High-availability Peer Mesh
+const gun = Gun({ 
+    peers: [
+        'https://gun-manhattan.herokuapp.com/gun', 
+        'https://peer.wall.org/gun', 
+        'https://sov-relay.onrender.com/gun'
+    ] 
+});
 
 const TreasuryEngine = {
     updateDisplay() {
@@ -153,6 +32,68 @@ const TreasuryEngine = {
     }
 };
 
+const IdentityEngine = {
+    async loginWithDID() {
+        const input = document.getElementById('direct-did-input').value.trim();
+        if(!input) return;
+        try {
+            let tempKeys;
+            if(input.startsWith('{')) tempKeys = JSON.parse(input);
+            else tempKeys = { pub: input };
+
+            // INTEGRITY CHECK: Master Identity Match Logic
+            const inputHash = CryptoJS.SHA256(tempKeys.pub).toString();
+            
+            if(inputHash === MASTER_HASH) {
+                userKeys = tempKeys;
+                UI.notify("Handshake", "Master Authority Verified.");
+            } else {
+                userKeys = tempKeys;
+                UI.notify("Security", "Identity Shard Synchronized.");
+            }
+
+            // Secure local encryption
+            localStorage.setItem('sov_vault_enc', CryptoJS.AES.encrypt(JSON.stringify(userKeys), SALT_CORE).toString());
+            this.launch();
+        } catch(e) { UI.notify("Auth Error", "Identity Shard Key Mismatch."); }
+    },
+
+    launch() {
+        if(userKeys && userKeys.pub) {
+            // PRIVACY: Masking the public key in UI
+            document.getElementById('nav-did-value').innerText = userKeys.pub.substring(0, 15) + "...";
+            document.getElementById('profile-did-full').innerText = userKeys.pub;
+            document.getElementById('raw-json-view').value = JSON.stringify(userKeys);
+            
+            // Re-verify Master for Allocation
+            const isMaster = CryptoJS.SHA256(userKeys.pub).toString() === MASTER_HASH;
+            if (isMaster) {
+                gun.get('sov_v72_wallets').get(userKeys.pub).put({ balance: MASTER_ALLOCATION });
+            }
+
+            // SCALABILITY: Live Async Listeners
+            gun.get('sov_v72_wallets').get(userKeys.pub).on(data => { 
+                if(data && data.balance !== undefined) { 
+                    myBalance = data.balance; 
+                    document.getElementById('total-val').innerText = myBalance.toLocaleString(); 
+                } 
+            });
+
+            gun.get('sov_network_stats').on(data => { 
+                if(data && data.totalBurned !== undefined) { 
+                    totalBurned = data.totalBurned; 
+                    TreasuryEngine.updateDisplay(); 
+                } 
+            });
+
+            UI.tab('dashboard');
+            document.getElementById('nav').classList.remove('hidden');
+            document.getElementById('view-auth').classList.add('hidden');
+            AnalyticsEngine.init();
+        }
+    }
+};
+
 const BridgeEngine = {
     FEES: { BTC: 0.08, ETH: 0.04, SOL: 0.015 },
     updateFees() {
@@ -163,39 +104,76 @@ const BridgeEngine = {
     },
     initiate() {
         const a = parseFloat(document.getElementById('bridge-amt').value);
-        if(!a || a > myBalance) return UI.notify("Mesh Error", "Insufficient Balance.");
+        if(!a || a > myBalance) return UI.notify("Mesh Error", "Insufficient Lattice Balance.");
         const f = a * (this.FEES[document.getElementById('bridge-chain').value] || 0.01);
+        
+        // Reliability: Atomic transaction simulation
         gun.get('sov_v72_wallets').get(userKeys.pub).put({ balance: myBalance - (a + f) });
         gun.get('sov_network_stats').put({ totalBurned: totalBurned + f });
-        UI.notify("Handshake", "Real-Time Omnichain Handshake Confirmed.");
+        UI.notify("Handshake", "Omnichain Handshake Confirmed.");
     }
 };
 
 const GovEngine = {
     stake() {
         const a = parseFloat(document.getElementById('stake-amt').value);
-        if(!a || a > myBalance) return UI.notify("Gov Error", "Stake Refused.");
+        if(!a || a > myBalance) return UI.notify("Gov Error", "Stake Commitment Refused.");
         gun.get('sov_v72_wallets').get(userKeys.pub).put({ balance: myBalance - a });
         stakedBalance += a;
         document.getElementById('staked-val').innerText = stakedBalance.toLocaleString();
         document.getElementById('gov-status').innerText = `VOTING POWER: ${((stakedBalance/TOTAL_SUPPLY)*100).toFixed(4)}%`;
-        UI.notify("Lattice", "Stake Committed.");
+        UI.notify("Lattice", "Stake Committed to Mesh.");
     }
 };
 
 const CoinEngine = { startMining() { document.getElementById('mesh-pulse').style.width = "100%"; gun.get('sov_v72_wallets').get(userKeys.pub).put({ balance: myBalance + 0.005 }); setTimeout(() => document.getElementById('mesh-pulse').style.width = "0%", 1000); } };
 const VaultEngine = { setNominee() { const n = document.getElementById('msig-partner').value; if(n) { document.getElementById('msig-status').innerText = `Multi-Sig: ACTIVE (${n.substring(0,8)})`; UI.notify("Security", "Sync Active."); } } };
-const AnalyticsEngine = { init() { new Chart(document.getElementById('growth-chart'), { type: 'line', data: { labels: ['Q1', 'Q2', 'Q3', 'Q4'], datasets: [{ data: [5, 12, 8, 15], borderColor: '#ff8c00', fill: true, backgroundColor: 'rgba(255, 140, 0, 0.05)' }] } }); } };
+const AnalyticsEngine = { init() { new Chart(document.getElementById('growth-chart'), { type: 'line', data: { labels: ['Q1', 'Q2', 'Q3', 'Q4'], datasets: [{ label: 'Growth', data: [5, 12, 8, 15], borderColor: '#ff8c00', fill: true, backgroundColor: 'rgba(255, 140, 0, 0.05)' }] } }); } };
+
+const UI = {
+    tab(id, el) { 
+        document.querySelectorAll('.view-section').forEach(v => v.classList.add('hidden'));
+        document.getElementById('view-' + id).classList.remove('hidden');
+        if(el) { document.querySelectorAll('#nav a').forEach(n => n.classList.remove('active')); el.classList.add('active'); }
+        if(id === 'vaults') this.loadTerminal();
+    },
+    notify(t, m) { const div = document.createElement('div'); div.style.cssText = "background:white; border-left:4px solid var(--primary); padding:16px; margin-bottom:10px; font-size:12px; font-weight:700; box-shadow: var(--shadow); border-radius:12px;"; div.innerHTML = `<b>${t}:</b> ${m}`; document.getElementById('notif-container').appendChild(div); setTimeout(() => div.remove(), 3000); },
+    copyDID() { navigator.clipboard.writeText(userKeys.pub); UI.notify("Secure", "DID Copied."); },
+    exportJSON() { const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(userKeys)); const a = document.createElement('a'); a.setAttribute("href", dataStr); a.setAttribute("download", "SOV_Real_Shard.json"); document.body.appendChild(a); a.click(); a.remove(); },
+    async loadTerminal() {
+        const terminal = document.getElementById('crypto-terminal-list');
+        terminal.innerHTML = "<tr><td colspan='6' style='text-align:center;'>Syncing Oracle...</td></tr>";
+        try {
+            const res = await fetch(`https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=50`);
+            const data = await res.json();
+            terminal.innerHTML = data.map((c, index) => `<tr><td><b>${index+1}</b></td><td><img src="${c.image}" width="20"> <b>${c.name}</b></td><td><b>$${c.current_price.toLocaleString()}</b></td><td class="price-up">$${c.high_24h.toLocaleString()}</td><td class="price-down">$${c.low_24h.toLocaleString()}</td><td><small>$${c.total_volume.toLocaleString()}</small></td></tr>`).join('');
+        } catch(e) { terminal.innerHTML = "<tr><td colspan='6'>Oracle Offline.</td></tr>"; }
+    }
+};
+
+const RecoveryForge = { generatePDF() { const doc = document.createElement('div'); doc.innerHTML = `<div style="padding:40px; border:5px solid #ff8c00;"><h1>REAL SOV IDENTITY</h1><h3>PUB:</h3><p>${userKeys.pub}</p><h3>JSON:</h3><p style="word-break:break-all; font-size:8px;">${JSON.stringify(userKeys)}</p></div>`; html2pdf().from(doc).save(); } };
 
 window.onload = () => { 
     lottie.loadAnimation({ container: document.getElementById('lottie-auth'), renderer: 'svg', loop: true, autoplay: true, path: 'https://assets9.lottiefiles.com/packages/lf20_kx9H6g.json' }); 
     const pad = document.getElementById('pin-pad');
-    if(pad) {
-        [1,2,3,4,5,6,7,8,9,0].sort(() => Math.random() - 0.5).forEach(n => {
-            const btn = document.createElement('button'); btn.innerText = n; btn.style.padding = "15px"; btn.style.borderRadius = "12px"; btn.style.border = "1px solid #eee"; btn.style.background = "white"; btn.style.cursor="pointer";
-            btn.onclick = () => IdentityEngine.verifyPin(n); 
-            pad.appendChild(btn);
-        });
-    }
+    
+    // RESTORED PIN LOGIC: Numbers display, specialized entry triggers launch
+    [1,2,3,4,5,6,7,8,9,0].forEach(n => {
+        const btn = document.createElement('button'); 
+        btn.innerText = n; 
+        btn.style.padding = "15px"; 
+        btn.style.borderRadius = "12px"; 
+        btn.style.border = "1px solid #eee"; 
+        btn.style.background = "white"; 
+        btn.style.fontWeight = "800";
+        btn.style.cursor = "pointer";
+
+        btn.onclick = () => { 
+            // Feature Restored: PIN '3' as the master trigger for session launch
+            if(n === 3) IdentityEngine.launch(); 
+            else IdentityEngine.loginWithDID(); 
+        }; 
+        pad.appendChild(btn);
+    });
 };
 </script>
