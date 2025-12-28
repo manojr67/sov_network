@@ -130,7 +130,6 @@ const CipherShield = {
 };
 
 let userKeys = null, pinBuffer = "", pendingAction = null;
-// GunDB Peers Updated for Better Reliability
 const gun = Gun({ peers: ['https://gun-manhattan.herokuapp.com/gun', 'https://peer.wall.org/gun', 'https://sov-relay.onrender.com/gun'] });
 
 const SecurityGate = {
@@ -164,14 +163,7 @@ const IdentityEngine = {
         document.getElementById('nav-did-value').innerText = CipherShield.maskDID(userKeys.pub);
         if(document.getElementById('profile-did-short')) {
             document.getElementById('profile-did-short').innerText = userKeys.pub.substring(0, 15) + "...";
-            // Dynamic MJRAWAT Branding Injection
-            const mjShard = { 
-                owner: "MJRAWAT", 
-                rank: "GENESIS_PRIME", 
-                did: userKeys.pub, 
-                status: "ACTIVE",
-                lattice: "SECURE" 
-            };
+            const mjShard = { owner: "MJRAWAT", rank: "GENESIS_PRIME", did: userKeys.pub, status: "ACTIVE", lattice: "SECURE" };
             document.getElementById('raw-json-view').value = JSON.stringify(mjShard, null, 2);
         }
         UI.tab('dashboard');
@@ -214,29 +206,12 @@ const AnalyticsEngine = {
     init() { 
         const ctx = document.getElementById('growth-chart');
         if(!ctx) return;
-        // Destroy existing chart if it exists to prevent overlap
         const existingChart = Chart.getChart(ctx);
         if (existingChart) existingChart.destroy();
-
         new Chart(ctx, { 
             type: 'line', 
-            data: { 
-                labels: ['Q1','Q2','Q3','Q4'], 
-                datasets: [{ 
-                    label: 'Lattice Growth', 
-                    data: [10, 25, 45, 80], 
-                    borderColor: '#ff8c00', 
-                    backgroundColor: 'rgba(255, 140, 0, 0.1)',
-                    fill: true,
-                    tension: 0.4 
-                }] 
-            },
-            options: { 
-                responsive: true, 
-                maintainAspectRatio: false,
-                plugins: { legend: { display: false } },
-                scales: { y: { beginAtZero: true } }
-            }
+            data: { labels: ['Q1','Q2','Q3','Q4'], datasets: [{ label: 'Lattice Growth', data: [10, 25, 45, 80], borderColor: '#ff8c00', backgroundColor: 'rgba(255, 140, 0, 0.1)', fill: true, tension: 0.4 }] },
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }
         }); 
     } 
 };
@@ -244,7 +219,6 @@ const AnalyticsEngine = {
 window.onload = () => {
     const pad = document.getElementById('action-pin-pad');
     if(!pad) return;
-    // Fisher-Yates shuffle for better security
     const nums = [1,2,3,4,5,6,7,8,9,0].sort(() => Math.random() - 0.5);
     nums.forEach(n => {
         const btn = document.createElement('button'); 
@@ -254,6 +228,21 @@ window.onload = () => {
         pad.appendChild(btn);
     });
 };
+
+// --- 🛡️ LAYER 3: INTEGRITY SEAL MERGED ---
+(function IntegritySeal() {
+    // MJRAWAT: यहाँ अपना मास्टर हैश जेनरेट करके डालें
+    const originalHash = "04028ffa16deff3f59d9b3b3cf0d11b0d5a9ffb09bd34d1cbe96ee98badabd42"; 
+    
+    const scriptContent = document.getElementById('main-logic').innerHTML;
+    const currentHash = CryptoJS.SHA256(scriptContent).toString();
+    
+    if (originalHash !== currentHash) {
+        document.getElementById('master-body').innerHTML = ""; 
+        document.write("<div style='background:#000; color:#ff0000; height:100vh; display:flex; align-items:center; justify-content:center; flex-direction:column; font-family:sans-serif;'><h1>🚨 SYSTEM TAMPERED</h1><p>MJRAWAT SECURITY: INTEGRITY HASH MISMATCH. ACCESS REVOKED.</p></div>");
+        setTimeout(() => { window.location.href = "about:blank"; }, 3000);
+    }
+})();
 </script>
 </body>
 </html>
