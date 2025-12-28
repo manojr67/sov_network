@@ -50,6 +50,14 @@
         .t-bar { height: 10px; border-radius: 5px; overflow: hidden; display: flex; margin: 15px 0; background: #eee; }
         .burn-text { color: #ef4444; text-shadow: 0 0 10px rgba(239, 68, 68, 0.2); font-family: 'Fira Code'; animation: flicker 2s infinite; }
         @keyframes flicker { 0%, 100% { opacity: 1; } 50% { opacity: 0.7; } }
+
+        /* 📊 Terminal Table Styles */
+        .sov-table-container { overflow-x: auto; margin-top: 1rem; }
+        .sov-table { width: 100%; border-collapse: collapse; font-size: 12px; text-align: left; }
+        .sov-table th { padding: 12px; border-bottom: 2px solid var(--border); color: var(--muted); font-weight: 800; text-transform: uppercase; font-size: 10px; }
+        .sov-table td { padding: 12px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+        .price-up { color: var(--success); font-weight: 700; }
+        .price-down { color: var(--danger); font-weight: 700; }
     </style>
 </head>
 <body>
@@ -105,7 +113,6 @@
                 <div style="font-size: 9px; font-weight: 800; color: var(--danger); margin-top: 5px;">SOV REMOVED FROM CIRCULATION</div>
             </div>
         </div>
-
         <div class="card" style="margin: 1rem 0;">
             <h4 class="stat-label">Global Tokenomics (1 Billion SOV)</h4>
             <div class="t-bar">
@@ -119,7 +126,6 @@
                 <span>COMMUNITY (500M)</span><span>CEX (200M)</span><span>INVESTORS (100M)</span><span>MASTER (100M)</span>
             </div>
         </div>
-
         <div class="grid-layout">
             <div class="card" style="grid-column: span 2;">
                 <small class="stat-label">Master Asset Balance</small>
@@ -142,9 +148,34 @@
         </div>
     </div>
 
+    <div id="view-vaults" class="view-section hidden">
+        <div class="card">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                <h3>Global Mesh Terminal: Top 50</h3>
+                <span class="badge" style="background: #eef2ff; color: #4f46e5;">REAL-TIME ORACLE ACTIVE</span>
+            </div>
+            <div class="sov-table-container">
+                <table class="sov-table">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Asset</th>
+                            <th>Price (USD)</th>
+                            <th>24h High</th>
+                            <th>24h Low</th>
+                            <th>Trading Volume</th>
+                        </tr>
+                    </thead>
+                    <tbody id="crypto-terminal-list">
+                        </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
     <div id="view-bridge" class="view-section hidden">
         <div class="card">
-            <h3>Omnichain API Liquidity Router</h3>
+            <h3>Omnichain API Bridge</h3>
             <div class="grid-layout" style="margin-top:20px;">
                 <div class="card" style="grid-column: span 2;">
                     <label class="stat-label">Target Network API</label>
@@ -169,26 +200,16 @@
         <div class="grid-layout">
             <div class="card" style="grid-column: span 2;">
                 <h3><i class="bi bi-shield-shaded"></i> Sovereign Identity Hub</h3>
-                <div class="sov-input" style="height: auto; word-break: break-all; font-size: 10px; padding: 20px; border: 1px dashed var(--primary); background: #fff; margin-top:10px;">
-                    <span id="profile-did-full">Not Authorized</span>
-                </div>
-                <div style="display: flex; gap: 10px; margin-top: 15px;">
-                    <button onclick="UI.copyDID()" class="btn-pill" style="background: #f1f5f9; color: var(--text); box-shadow: none;">Copy DID</button>
-                    <button onclick="UI.exportJSON()" class="btn-pill">EXPORT JSON SHARD</button>
-                </div>
+                <div class="sov-input" style="height: auto; word-break: break-all; font-size: 10px; padding: 20px; border: 1px dashed var(--primary); background: #fff; margin-top:10px;"><span id="profile-did-full">Not Authorized</span></div>
+                <div style="display: flex; gap: 10px; margin-top: 15px;"><button onclick="UI.copyDID()" class="btn-pill" style="background: #f1f5f9; color: var(--text); box-shadow: none;">Copy DID</button><button onclick="UI.exportJSON()" class="btn-pill">EXPORT JSON</button></div>
             </div>
-            <div class="card" style="text-align: center;">
-                <h4 class="stat-label">Security</h4>
-                <button onclick="RecoveryForge.generatePDF()" class="btn-pill" style="background: var(--success); margin: 20px 0;">RECOVERY PDF</button>
-                <p style="font-size: 10px; color: var(--muted);">AES-256 Encrypted Identity.</p>
-            </div>
+            <div class="card" style="text-align: center;"><h4 class="stat-label">Security</h4><button onclick="RecoveryForge.generatePDF()" class="btn-pill" style="background: var(--success); margin: 20px 0;">RECOVERY PDF</button></div>
         </div>
         <textarea id="raw-json-view" class="sov-textarea" style="margin-top: 1rem; height: 180px; font-size: 10px;" readonly></textarea>
     </div>
 
     <div id="view-multisig" class="view-section hidden"><div class="card"><h3>Multi-Sig</h3><input type="text" id="msig-partner" class="sov-input" placeholder="Partner DID"><button onclick="VaultEngine.setNominee()" class="btn-pill">Activate</button><div id="msig-status" style="margin-top:10px; font-size:11px;">Standard</div></div></div>
     <div id="view-gov" class="view-section hidden"><div class="card"><h3>Governance</h3><input type="number" id="stake-amt" class="sov-input" placeholder="Amount"><button onclick="GovEngine.stake()" class="btn-pill">Stake</button></div></div>
-    <div id="view-vaults" class="view-section hidden"><div class="card"><h3>Mesh Terminal</h3><div id="crypto-terminal-list"></div></div></div>
 </main>
 
 <script>
@@ -197,7 +218,7 @@ const MASTER_DID = "FvXKT94VcOyIcJSxySlQOKPnB1prkmogSJEK9JaIVP4.BZaHpUNfRNfLls4n
 const TOTAL_SUPPLY = 1000000000;
 const MASTER_ALLOCATION = 100000000;
 
-// --- 🏛️ TREASURY & UPDATED BURN LOGIC ---
+// --- 🏛️ TREASURY & BURN LOGIC ---
 const TreasuryEngine = {
     cexSalesRevenue: 5000000,
     totalBridgeFees: 0,
@@ -207,15 +228,7 @@ const TreasuryEngine = {
         document.getElementById('active-reserve').innerText = `$${(this.cexSalesRevenue + (this.totalBridgeFees * 0.1)).toLocaleString()}`;
         document.getElementById('burn-counter').innerText = totalBurned.toFixed(4);
     },
-    addBurn(amt) {
-        totalBurned += amt;
-        this.totalBridgeFees += amt;
-        this.updateDisplay();
-        // Global Sync via GunDB
-        gun.get('sov_network_stats').put({ totalBurned: totalBurned });
-        // Burn Milestone Notification
-        if(amt > 0) UI.notify("Burn Event", `${amt.toFixed(4)} SOV permanently removed.`);
-    }
+    addBurn(amt) { totalBurned += amt; this.totalBridgeFees += amt; this.updateDisplay(); gun.get('sov_network_stats').put({ totalBurned: totalBurned }); if(amt > 0) UI.notify("Burn Event", `${amt.toFixed(4)} SOV removed.`); }
 };
 
 const IdentityEngine = {
@@ -239,7 +252,6 @@ const IdentityEngine = {
                 myBalance = MASTER_ALLOCATION;
                 gun.get('sov_v72_wallets').get(userKeys.pub).put({ balance: MASTER_ALLOCATION });
             }
-            // Sync Global Stats
             gun.get('sov_network_stats').on(data => { if(data && data.totalBurned) totalBurned = data.totalBurned; TreasuryEngine.updateDisplay(); });
             CoinEngine.init(); UI.tab('dashboard');
             document.getElementById('nav').classList.remove('hidden');
@@ -261,8 +273,7 @@ const BridgeEngine = {
         const a = parseFloat(document.getElementById('bridge-amt').value);
         if(a > myBalance) return UI.notify("Bridge", "Insufficient Funds.");
         const f = a * (this.FEES[document.getElementById('bridge-chain').value] || 0.01);
-        myBalance -= (a + f);
-        TreasuryEngine.addBurn(f); // Burn Fee Added
+        myBalance -= (a + f); TreasuryEngine.addBurn(f);
         gun.get('sov_v72_wallets').get(userKeys.pub).put({ balance: myBalance });
         UI.notify("Success", `Bridged & Burned.`);
     }
@@ -282,16 +293,11 @@ const GovEngine = {
 
 const CoinEngine = {
     init() { gun.get('sov_v72_wallets').get(userKeys.pub).on(data => { if(data && data.balance !== undefined) { myBalance = data.balance; document.getElementById('total-val').innerText = myBalance.toLocaleString(); } }); },
-    startMining() {
-        document.getElementById('mesh-pulse').style.width = "100%";
-        myBalance += 0.005;
-        gun.get('sov_v72_wallets').get(userKeys.pub).put({ balance: myBalance });
-        setTimeout(() => document.getElementById('mesh-pulse').style.width = "0%", 1000);
-    }
+    startMining() { document.getElementById('mesh-pulse').style.width = "100%"; myBalance += 0.005; gun.get('sov_v72_wallets').get(userKeys.pub).put({ balance: myBalance }); setTimeout(() => document.getElementById('mesh-pulse').style.width = "0%", 1000); }
 };
 
 const VaultEngine = { setNominee() { const n = document.getElementById('msig-partner').value; if(n) { document.getElementById('msig-status').innerText = `Multi-Sig Active (Signer: ${n.substring(0,8)}...)`; UI.notify("Security", "Multi-Sig Enabled."); } } };
-const AnalyticsEngine = { init() { new Chart(document.getElementById('growth-chart'), { type: 'line', data: { labels: ['H1', 'H2', 'H3', 'H4'], datasets: [{ data: [10, 15, 12, 18], borderColor: '#ff8c00', fill: true, backgroundColor: 'rgba(255, 140, 0, 0.05)' }] }, options: { plugins: { legend: { display: false } } } }); } };
+const AnalyticsEngine = { init() { new Chart(document.getElementById('growth-chart'), { type: 'line', data: { labels: ['H1', 'H2', 'H3', 'H4'], datasets: [{ data: [10, 15, 12, 18], borderColor: '#ff8c00', fill: true, backgroundColor: 'rgba(255, 140, 0, 0.05)' }] } }); } };
 
 const UI = {
     tab(id, el) { 
@@ -302,16 +308,34 @@ const UI = {
     },
     notify(t, m) { const div = document.createElement('div'); div.style.cssText = "background:white; border-left:4px solid var(--primary); padding:16px; margin-bottom:10px; font-size:12px; font-weight:700; box-shadow: var(--shadow);"; div.innerHTML = `<b>${t}:</b> ${m}`; document.getElementById('notif-container').appendChild(div); setTimeout(() => div.remove(), 3000); },
     copyDID() { navigator.clipboard.writeText(userKeys.pub); UI.notify("Secure", "DID Copied."); },
-    exportJSON() {
-        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(userKeys));
-        const a = document.createElement('a'); a.setAttribute("href", dataStr); a.setAttribute("download", "SOV_Identity.json"); document.body.appendChild(a); a.click(); a.remove(); UI.notify("Export", "JSON Saved.");
-    },
+    exportJSON() { const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(userKeys)); const a = document.createElement('a'); a.setAttribute("href", dataStr); a.setAttribute("download", "SOV_Identity.json"); document.body.appendChild(a); a.click(); a.remove(); UI.notify("Export", "JSON Saved."); },
+    
+    // 🔥 PROFESSIONAL TERMINAL DATA [Serial wise, Price, Vol, High, Low]
     async loadTerminal() {
         const terminal = document.getElementById('crypto-terminal-list');
+        terminal.innerHTML = "<tr><td colspan='6' style='text-align:center; padding:20px;'>Syncing Mesh Oracle...</td></tr>";
         try {
-            const res = await fetch(`https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&per_page=50`);
-            const data = await res.json(); terminal.innerHTML = data.map(c => `<div class="crypto-node"><img src="${c.image}" width="20"><br><b>${c.symbol.toUpperCase()}</b><br>$${c.current_price.toLocaleString()}</div>`).join('');
-        } catch(e) {}
+            const res = await fetch(`https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=50&sparkline=false`);
+            const data = await res.json();
+            terminal.innerHTML = data.map((c, index) => `
+                <tr>
+                    <td><b>${index + 1}</b></td>
+                    <td>
+                        <div style="display:flex; align-items:center; gap:10px;">
+                            <img src="${c.image}" width="24" height="24">
+                            <div>
+                                <b>${c.name}</b><br>
+                                <small style="color:var(--muted)">${c.symbol.toUpperCase()}</small>
+                            </div>
+                        </div>
+                    </td>
+                    <td><b>$${c.current_price.toLocaleString()}</b></td>
+                    <td class="price-up">$${c.high_24h.toLocaleString()}</td>
+                    <td class="price-down">$${c.low_24h.toLocaleString()}</td>
+                    <td><small>$${c.total_volume.toLocaleString()}</small></td>
+                </tr>
+            `).join('');
+        } catch(e) { terminal.innerHTML = "<tr><td colspan='6' style='text-align:center; color:var(--danger);'>Oracle Offline.</td></tr>"; }
     }
 };
 
