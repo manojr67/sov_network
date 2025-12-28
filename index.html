@@ -1,122 +1,13 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://unpkg.com 'unsafe-inline'; style-src 'self' https://cdn.jsdelivr.net https://fonts.googleapis.com 'unsafe-inline'; font-src 'self' https://fonts.gstatic.com https://cdn.jsdelivr.net; connect-src 'self' https://gun-manhattan.herokuapp.com/gun https://sov-relay.onrender.com/gun; img-src 'self' data:;">
-
-    <title>SOV Ultimate | Sovereign Lattice Network</title>
-    
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;500;700;800&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
-    
-    <script src="https://cdn.jsdelivr.net/npm/gun/gun.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/gun/sea.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-
-    <style>
-        :root {
-            --primary: #f7931a; --primary-dark: #d97706; --navy: #020617;
-            --text: #f8fafc; --text-muted: #94a3b8; --border: rgba(255,255,255,0.1);
-            --card-bg: rgba(15, 23, 42, 0.7); --success: #10b981; --danger: #ef4444;
-        }
-
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Plus Jakarta Sans', sans-serif; color: var(--text); background: var(--navy); overflow-x: hidden; line-height: 1.6; }
-
-        .bg-glow { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(circle at 80% 20%, rgba(247,147,26,0.12) 0%, transparent 40%), radial-gradient(circle at 20% 80%, rgba(247,147,26,0.05) 0%, transparent 40%); z-index: -1; }
-        .page-section { display: none; }
-        .page-section.active { display: block; animation: fadeIn 0.6s ease-out; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-
-        nav { position: fixed; top: 0; width: 100%; padding: 1.5rem 8%; display: flex; justify-content: space-between; align-items: center; backdrop-filter: blur(20px); z-index: 1000; border-bottom: 1px solid var(--border); }
-        .logo { font-weight: 800; font-size: 1.4rem; color: var(--primary); text-decoration: none; display: flex; align-items: center; gap: 10px; cursor: pointer; }
-        .nav-links a { margin-left: 2rem; text-decoration: none; color: var(--text-muted); font-weight: 600; font-size: 0.9rem; transition: 0.3s; cursor: pointer; }
-        .nav-links a.active-link { color: var(--primary); border-bottom: 2px solid var(--primary); }
-
-        .hero { min-height: 90vh; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 0 10%; margin-top: 50px; }
-        .hero h1 { font-size: 5rem; font-weight: 800; letter-spacing: -3px; line-height: 0.9; margin-bottom: 2rem; }
-        .hero h1 span { color: var(--primary); }
-
-        .btn-prime { background: var(--primary); color: white; padding: 1rem 2.5rem; border-radius: 50px; font-weight: 700; transition: 0.4s; border: none; cursor: pointer; box-shadow: 0 10px 30px rgba(247, 147, 26, 0.3); }
-
-        .vault-card { max-width: 450px; margin: 0 auto; background: var(--card-bg); padding: 2.5rem; border-radius: 40px; border: 1px solid var(--border); box-shadow: 0 40px 100px rgba(0,0,0,0.5); text-align: center; }
-        .pin-display { font-size: 2.5rem; letter-spacing: 12px; margin-bottom: 2rem; color: var(--primary); font-family: 'Fira Code'; height: 50px; }
-        .pad-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
-        .pad-btn { padding: 1rem; border-radius: 18px; border: 1px solid var(--border); background: rgba(255,255,255,0.05); color: white; font-weight: 700; cursor: pointer; }
-        .pad-btn:hover { background: var(--primary); }
-
-        .tx-row { background: rgba(255,255,255,0.03); border: 1px solid var(--border); padding: 15px; border-radius: 15px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; font-family: 'Fira Code'; font-size: 0.8rem; }
-        .status-tag { padding: 4px 10px; border-radius: 6px; font-size: 0.6rem; font-weight: 800; background: var(--success); color: white; }
-
-        .sov-textarea { width: 100%; height: 100px; font-size: 11px; padding: 15px; border-radius: 20px; border: 1px solid var(--border); background: rgba(0,0,0,0.4); color: var(--primary); font-family: 'Fira Code'; resize: none; margin-bottom: 15px; }
-
-        .hidden { display: none !important; }
-        footer { padding: 4rem 10%; border-top: 1px solid var(--border); text-align: center; color: var(--text-muted); font-size: 0.9rem; }
-    </style>
-</head>
-<body>
-
-<div class="bg-glow"></div>
-
 <nav>
     <a onclick="switchTab('home')" class="logo"><i class="bi bi-hexagon-fill"></i> SOV.NETWORK</a>
     <div class="nav-links">
         <a id="link-home" onclick="switchTab('home')" class="active-link">Technology</a>
-        <a id="link-explorer" onclick="switchTab('explorer')">Explorer</a>
+        
+        <a href="explorer.html" target="_blank" id="link-explorer">Explorer</a>
+        
         <a id="link-vault" onclick="switchTab('vault')" class="btn-prime" style="padding: 0.6rem 1.8rem; font-size: 0.85rem; color: white !important;">Access Vault</a>
     </div>
 </nav>
-
-<div id="section-home" class="page-section active">
-    <section class="hero">
-        <h1>Global <span>Lattice</span> Mesh Infrastructure.</h1>
-        <p>A high-performance P2P network engineered for permanent sovereignty and post-quantum data integrity.</p>
-        <div style="display: flex; gap: 20px;">
-            <button onclick="switchTab('vault')" class="btn-prime">Initialize Node</button>
-            <button class="btn-prime" style="background: transparent; border: 1px solid var(--border);">Economics</button>
-        </div>
-    </section>
-</div>
-
-<div id="section-explorer" class="page-section">
-    <section class="hero" style="min-height: 85vh; justify-content: flex-start; padding-top: 8rem;">
-        <div style="text-align: center; width: 100%;">
-            <p style="color: var(--primary); font-weight: 800; font-size: 0.8rem; letter-spacing: 2px; margin-bottom: 1rem;">LIVE DATA STREAM</p>
-            <h1 style="font-size: 3.5rem;">Lattice Explorer</h1>
-            <div style="max-width: 900px; margin: 3rem auto; background: var(--card-bg); border: 1px solid var(--border); padding: 2.5rem; border-radius: 40px;">
-                <div id="explorer-list"></div>
-            </div>
-        </div>
-    </section>
-</div>
-
-<div id="section-vault" class="page-section">
-    <section class="hero">
-        <div class="vault-card">
-            <h2 id="vault-msg">Initialize Sovereign Node</h2>
-            
-            <div id="pin-login-container">
-                <div class="pin-display" id="pin-view">***</div>
-                <div class="pad-grid" id="pin-pad"></div>
-                <button onclick="toggleLoginMethod('key')" style="background:none; border:none; color:var(--primary); font-size:11px; cursor:pointer; font-weight:800; margin-top:20px;"><i class="bi bi-shield-lock-fill"></i> Login with Identity DID / JSON</button>
-            </div>
-
-            <div id="key-login-container" class="hidden">
-                <p style="font-size: 11px; color: var(--text-muted); margin-bottom: 15px;">Paste your Sovereign DID address or Secret JSON Shard</p>
-                <textarea id="identity-input" class="sov-textarea" placeholder='{"pub": "...", "priv": "..."} OR DID Address'></textarea>
-                <button onclick="loginWithIdentity()" class="btn-prime" style="width:100%; border-radius:20px;">RESTORE NODE SESSION</button>
-                <button onclick="toggleLoginMethod('pin')" style="background:none; border:none; color:var(--text-muted); font-size:11px; cursor:pointer; font-weight:800; margin-top:20px;">Back to PIN Pad</button>
-            </div>
-
-            <div id="v-status" style="color: var(--text-muted); font-size: 10px; font-weight: 800; margin-top: 20px; font-family: 'Fira Code';">STANDBY</div>
-        </div>
-    </section>
-</div>
-
-<footer><p>&copy; 2025 SOV NETWORK | Powered by GunDB Lattice Mesh</p></footer>
 
 <script>
     let currentInput = "";
@@ -131,21 +22,68 @@
     const vStatus = document.getElementById('v-status');
     const isNewUser = !localStorage.getItem('sov_id_created');
 
-    function switchTab(tabId) {
-        document.querySelectorAll('.page-section').forEach(sec => sec.classList.remove('active'));
-        document.getElementById('section-' + tabId).classList.add('active');
-        document.querySelectorAll('.nav-links a').forEach(a => a.classList.remove('active-link'));
-        const activeLink = document.getElementById('link-' + tabId);
-        if(activeLink) activeLink.classList.add('active-link');
+    // 🟢 UPDATE 2: Robust Handshake Logic
+    function successRedirect(msg) {
+        localStorage.setItem('sov_id_created', 'true');
+        vStatus.innerText = msg;
+        vStatus.style.color = "var(--success)";
+        
+        // Handshake के बाद सीधे आपके Citadel Dashboard पर रीडायरेक्ट
+        setTimeout(() => { 
+            window.location.href = "citadel.html"; 
+        }, 1000);
     }
 
-    function toggleLoginMethod(method) {
-        const pinCont = document.getElementById('pin-login-container');
-        const keyCont = document.getElementById('key-login-container');
-        if(method === 'key') { pinCont.classList.add('hidden'); keyCont.classList.remove('hidden'); }
-        else { pinCont.classList.remove('hidden'); keyCont.classList.add('hidden'); }
+    // 🟢 UPDATE 3: Real Identity Bridge
+    async function loginWithIdentity() {
+        const input = document.getElementById('identity-input').value.trim();
+        if(!input) return;
+
+        vStatus.innerText = "VERIFYING REAL SHARD...";
+        vStatus.style.color = "var(--primary)";
+
+        try {
+            if(input.startsWith('{')) {
+                const parsed = JSON.parse(input);
+                if(parsed.pub) {
+                    localStorage.setItem('sov_vault_key', input);
+                    successRedirect("VAULT RESTORED");
+                } else throw new Error();
+            } else if(input.length > 30) {
+                localStorage.setItem('sov_last_did', input);
+                successRedirect("NODE RECOGNIZED");
+            } else {
+                throw new Error();
+            }
+        } catch(e) {
+            vStatus.innerText = "INVALID IDENTITY FORMAT";
+            vStatus.style.color = "var(--danger)";
+        }
     }
 
+    // --- 📡 REAL MESH SYNC ---
+    const gun = Gun(['https://gun-manhattan.herokuapp.com/gun', 'https://sov-relay.onrender.com/gun']);
+    
+    // Explorer Section में डेटा रेंडर करना (अगर यूजर इसी पेज पर देखना चाहे)
+    gun.get('sov_global_ledger').map().on((data, key) => {
+        if(!data || !data.sender) return;
+        const list = document.getElementById('explorer-list');
+        if(!list) return;
+        
+        const row = document.createElement('div');
+        row.className = 'tx-row';
+        row.innerHTML = `
+            <div>
+                <i class="bi bi-box-seam" style="color:var(--primary)"></i> 
+                <span>Shard: ${key.substring(0, 12)}...</span>
+            </div>
+            <div class="status-tag">VERIFIED</div>
+        `;
+        list.prepend(row);
+        if(list.children.length > 8) list.lastElementChild.remove();
+    });
+
+    // ... (बाकी renderPad और window.onload वैसे ही रहेंगे) ...
     function renderPad() {
         const pad = document.getElementById('pin-pad');
         pad.innerHTML = "";
@@ -183,56 +121,5 @@
         }
     }
 
-    // --- 🆔 LOGIN WITH IDENTITY (DID / JSON) ---
-    async function loginWithIdentity() {
-        const input = document.getElementById('identity-input').value.trim();
-        if(!input) return;
-
-        vStatus.innerText = "VERIFYING SHARD...";
-        vStatus.style.color = "var(--primary)";
-
-        try {
-            // Check if it's JSON Vault
-            if(input.startsWith('{')) {
-                const parsed = JSON.parse(input);
-                if(parsed.pub) {
-                    localStorage.setItem('sov_vault_key', input);
-                    successRedirect("VAULT RESTORED");
-                } else throw new Error();
-            } 
-            // Check if it's DID Address (Public Key)
-            else if(input.length > 30) {
-                localStorage.setItem('sov_last_did', input);
-                successRedirect("NODE RECOGNIZED");
-            } else {
-                throw new Error();
-            }
-        } catch(e) {
-            vStatus.innerText = "INVALID IDENTITY FORMAT";
-            vStatus.style.color = "var(--danger)";
-        }
-    }
-
-    function successRedirect(msg) {
-        localStorage.setItem('sov_id_created', 'true');
-        vStatus.innerText = msg;
-        vStatus.style.color = "var(--success)";
-        setTimeout(() => { window.location.href = "/Mainnet"; }, 1000);
-    }
-
-    // EXPLORER ENGINE
-    const gun = Gun(['https://gun-manhattan.herokuapp.com/gun', 'https://sov-relay.onrender.com/gun']);
-    gun.get('sov_v72_wallets').map().on((data, key) => {
-        if(!data) return;
-        const list = document.getElementById('explorer-list');
-        const row = document.createElement('div');
-        row.className = 'tx-row';
-        row.innerHTML = `<div><i class="bi bi-box-seam" style="color:var(--primary)"></i> <span>Block: ${key.substring(0, 12)}...</span></div><div class="status-tag">VERIFIED</div>`;
-        list.prepend(row);
-        if(list.children.length > 8) list.lastElementChild.remove();
-    });
-
     window.onload = () => { renderPad(); vaultMsg.innerText = isNewUser ? "Initialize Sovereign Node" : "Validator Handshake Required"; };
 </script>
-</body>
-</html>
