@@ -29,7 +29,7 @@
         .hero { text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 80vh; }
         .hero h1 { font-size: 4rem; font-weight: 800; margin-bottom: 1rem; }
         .hero h1 span { color: var(--primary); }
-        #node-map { height: 350px; width: 100%; max-width: 900px; border-radius: 30px; border: 1px solid var(--border); margin: 2rem 0; box-shadow: 0 20px 50px rgba(0,0,0,0.5); }
+        #node-map { height: 350px; width: 100%; max-width: 900px; border-radius: 30px; border: 1px solid var(--border); margin: 2rem 0; box-shadow: 0 20px 50px rgba(0,0,0,0.5); z-index: 1; }
         .vault-card { max-width: 450px; margin: 0 auto; background: var(--card-bg); padding: 2.5rem; border-radius: 40px; border: 1px solid var(--border); text-align: center; position: relative; overflow: hidden; }
         .pin-display { font-size: 2.5rem; letter-spacing: 12px; color: var(--primary); font-family: 'Fira Code'; margin-bottom: 2rem; height: 50px; }
         .pad-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
@@ -47,7 +47,7 @@
     <a onclick="switchTab('home')" class="logo"><i class="bi bi-hexagon-fill"></i> SOV.NETWORK</a>
     <div class="nav-links">
         <a onclick="switchTab('home')">Technology</a>
-        <a href="explorer.html" target="_blank">Lattice Explorer</a>
+        <a href="/explorer">Lattice Explorer</a>
         <a onclick="switchTab('vault')" class="btn-prime" style="color: white !important;">Access Vault</a>
     </div>
 </nav>
@@ -83,12 +83,17 @@
 
     let currentInput = "";
     const PIN_HASH = "a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3";
-    const gun = Gun({ peers: ['https://peer.wall.org/gun', 'https://sov-relay.onrender.com/gun'] });
+    
+    // 📡 RELIABLE MESH CONFIG
+    const gun = Gun({ peers: ['https://sov-relay.onrender.com/gun', 'https://peer.wall.org/gun'] });
 
     function switchTab(tabId) {
         document.querySelectorAll('.page-section').forEach(sec => sec.classList.remove('active'));
-        document.getElementById('section-' + tabId).classList.add('active');
-        if(tabId === 'home') setTimeout(initMap, 200);
+        const target = document.getElementById('section-' + tabId);
+        if(target) {
+            target.classList.add('active');
+            if(tabId === 'home') setTimeout(initMap, 200);
+        }
     }
 
     function handleInput(n) {
@@ -96,8 +101,9 @@
         document.getElementById('pin-view').innerText = "*".repeat(currentInput.length);
         if(currentInput.length === 3) {
             const inputHash = CryptoJS.SHA256(currentInput).toString();
-            if(inputHash === PIN_HASH) successRedirect("HANDSHAKE VERIFIED");
-            else {
+            if(inputHash === PIN_HASH) {
+                successRedirect("HANDSHAKE VERIFIED");
+            } else {
                 currentInput = ""; document.getElementById('pin-view').innerText = "***";
                 const status = document.getElementById('v-status');
                 status.innerText = "INVALID HANDSHAKE"; status.style.color = "var(--danger)";
@@ -105,35 +111,31 @@
         }
     }
 
-   function successRedirect(msg) {
-    console.log("HANDSHAKE VERIFIED. Forcing Redirect...");
-    localStorage.setItem('sov_id_created', 'true');
-    
-    // 🟢 'window.location.replace' का उपयोग करें क्योंकि यह ज़्यादा रिलायबल है
-    setTimeout(() => { 
-        // Render पर 'citadel' राउट का उपयोग करें (बिना .html के)
-        window.location.replace("/citadel"); 
-    }, 300)
-}
-    try {
-        // 📡 मेश पर हैंडशेक सिंक (Non-blocking)
-        const handshake = CipherShield.encryptData({ action: "VERIFIED", ts: Date.now() });
-        gun.get('sov_global_ledger').set(handshake);
-    } catch(e) {
-        console.warn("Mesh Sync Delayed, Proceeding anyway...");
-    }
+    function successRedirect(msg) {
+        console.log("HANDSHAKE VERIFIED. Redirecting...");
+        localStorage.setItem('sov_id_created', 'true');
+        
+        const status = document.getElementById('v-status');
+        if(status) {
+            status.innerText = msg;
+            status.style.color = "var(--success)";
+        }
 
-    console.log("Redirecting to Citadel...");
-    
-    // 🟢 FORCE REDIRECT: यह पक्का करेगा कि पेज खुले चाहे मेश धीमा हो
-    setTimeout(() => { 
-        // अगर फाइल का नाम Citadel.html है तो C बड़ा करें, वरना छोटा रखें
-        window.location.assign("citadel.html"); 
-    }, 800);
-}
+        try {
+            // 📡 मेश पर हैंडशेक सिंक
+            const handshake = CipherShield.encryptData({ action: "VERIFIED", ts: Date.now() });
+            gun.get('sov_global_ledger').set(handshake);
+        } catch(e) { console.warn("Mesh Sync Delayed"); }
+
+        // 🟢 Render राउटिंग के हिसाब से फोर्स रीडायरेक्ट
+        setTimeout(() => { 
+            window.location.replace("/citadel"); 
+        }, 800);
+    }
 
     function renderPad() {
         const pad = document.getElementById('pin-pad');
+        if(!pad) return;
         pad.innerHTML = "";
         [1,2,3,4,5,6,7,8,9,0].sort(() => Math.random() - 0.5).forEach(n => {
             const btn = document.createElement('button');
@@ -143,13 +145,19 @@
         });
     }
 
+    // --- 🗺️ WORLD MAP ---
     function initMap() {
         const container = document.getElementById('node-map');
         if (!container || container._leaflet_id) return;
-        const map = L.map('node-map', { zoomControl: false }).setView([20, 0], 2);
+        
+        const map = L.map('node-map', { zoomControl: false, attributionControl: false }).setView([20, 0], 2);
         L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png').addTo(map);
-        const nodes = [[51.5, -0.09], [40.7, -74], [35.6, 139.6], [28.6, 77.2], [-33.8, 151.2]];
-        nodes.forEach(pos => { L.circleMarker(pos, { color: '#f7931a', radius: 5 }).addTo(map); });
+        
+        const nodes = [[51.5, -0.09], [40.7, -74], [35.6, 139.6], [28.6, 77.2], [-33.8, 151.2], [19.07, 72.87]];
+        nodes.forEach(pos => {
+            L.circleMarker(pos, { color: '#f7931a', radius: 5, fillOpacity: 0.8 }).addTo(map)
+                .bindPopup("Sovereign Node: ACTIVE");
+        });
     }
 
     window.onload = () => { renderPad(); initMap(); };
