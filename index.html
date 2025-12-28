@@ -75,17 +75,22 @@
 </div>
 
 <script>
-    // --- 🔐 ENCRYPTION & DATA ---
+    // --- 🛡️ समाधान 1 & 3: Lockout & Shuffle Logic ---
+    let currentInput = "";
+    let attempts = 0;
+    const PIN_HASH = "a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3";
+
     const CipherShield = {
         MESH_SECRET: "SOV_LATTICE_INTEGRITY_SHIELD_99",
         encryptData(payload) { return CryptoJS.AES.encrypt(JSON.stringify(payload), this.MESH_SECRET).toString(); }
     };
 
-    let currentInput = "";
-    const PIN_HASH = "a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3";
-    
-    // 📡 RELIABLE MESH CONFIG
-    const gun = Gun({ peers: ['https://sov-relay.onrender.com/gun', 'https://peer.wall.org/gun'] });
+    // --- 🛡️ समाधान 2: Peer Health & Optimized Config ---
+    const gun = Gun({ 
+        peers: ['https://sov-relay.onrender.com/gun', 'https://peer.wall.org/gun'],
+        retry: 1000,
+        check: true 
+    });
 
     function switchTab(tabId) {
         document.querySelectorAll('.page-section').forEach(sec => sec.classList.remove('active'));
@@ -97,46 +102,58 @@
     }
 
     function handleInput(n) {
+        // Brute-force protection check
+        const lockoutTime = localStorage.getItem('sov_lockout');
+        if(lockoutTime && Date.now() < lockoutTime) {
+            const remaining = Math.ceil((lockoutTime - Date.now()) / 60000);
+            updateStatus(`SYSTEM LOCKED: TRY IN ${remaining} MIN`, "var(--danger)");
+            return;
+        }
+
         currentInput += n;
         document.getElementById('pin-view').innerText = "*".repeat(currentInput.length);
+        
         if(currentInput.length === 3) {
             const inputHash = CryptoJS.SHA256(currentInput).toString();
             if(inputHash === PIN_HASH) {
+                attempts = 0;
                 successRedirect("HANDSHAKE VERIFIED");
             } else {
-                currentInput = ""; document.getElementById('pin-view').innerText = "***";
-                const status = document.getElementById('v-status');
-                status.innerText = "INVALID HANDSHAKE"; status.style.color = "var(--danger)";
+                attempts++;
+                currentInput = ""; 
+                document.getElementById('pin-view').innerText = "***";
+                
+                if(attempts >= 5) {
+                    localStorage.setItem('sov_lockout', Date.now() + 600000); // 10 min lockout
+                    updateStatus("MAX ATTEMPTS: LOCKDOWN INITIATED", "var(--danger)");
+                } else {
+                    updateStatus(`INVALID: ${5 - attempts} ATTEMPTS LEFT`, "var(--danger)");
+                }
+                renderPad(); // Wrong pin par shuffle karega (Anti-Spy)
             }
         }
     }
 
-    function successRedirect(msg) {
-        console.log("HANDSHAKE VERIFIED. Redirecting...");
-        localStorage.setItem('sov_id_created', 'true');
-        
+    function updateStatus(msg, color) {
         const status = document.getElementById('v-status');
-        if(status) {
-            status.innerText = msg;
-            status.style.color = "var(--success)";
-        }
+        if(status) { status.innerText = msg; status.style.color = color; }
+    }
 
+    function successRedirect(msg) {
+        updateStatus(msg, "var(--success)");
+        localStorage.setItem('sov_id_created', 'true');
         try {
-            // 📡 मेश पर हैंडशेक सिंक
             const handshake = CipherShield.encryptData({ action: "VERIFIED", ts: Date.now() });
             gun.get('sov_global_ledger').set(handshake);
-        } catch(e) { console.warn("Mesh Sync Delayed"); }
-
-        // 🟢 Render राउटिंग के हिसाब से फोर्स रीडायरेक्ट
-        setTimeout(() => { 
-            window.location.replace("/citadel"); 
-        }, 800);
+        } catch(e) {}
+        setTimeout(() => { window.location.replace("/citadel"); }, 800);
     }
 
     function renderPad() {
         const pad = document.getElementById('pin-pad');
         if(!pad) return;
         pad.innerHTML = "";
+        // 🛡️ समाधान 3: Visual Shuffle on every render
         [1,2,3,4,5,6,7,8,9,0].sort(() => Math.random() - 0.5).forEach(n => {
             const btn = document.createElement('button');
             btn.className = 'pad-btn'; btn.innerText = n;
@@ -149,16 +166,23 @@
     function initMap() {
         const container = document.getElementById('node-map');
         if (!container || container._leaflet_id) return;
-        
         const map = L.map('node-map', { zoomControl: false, attributionControl: false }).setView([20, 0], 2);
         L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png').addTo(map);
-        
         const nodes = [[51.5, -0.09], [40.7, -74], [35.6, 139.6], [28.6, 77.2], [-33.8, 151.2], [19.07, 72.87]];
         nodes.forEach(pos => {
-            L.circleMarker(pos, { color: '#f7931a', radius: 5, fillOpacity: 0.8 }).addTo(map)
-                .bindPopup("Sovereign Node: ACTIVE");
+            L.circleMarker(pos, { color: '#f7931a', radius: 5, fillOpacity: 0.8 }).addTo(map).bindPopup("Node: ACTIVE");
         });
     }
+
+    // --- 🛡️ प्रो समाधान: Anti-Debugging "Dead Man Switch" ---
+    setInterval(() => {
+        const start = Date.now();
+        debugger; 
+        if (Date.now() - start > 100) {
+            document.body.innerHTML = "<h1>SECURITY VIOLATION DETECTED</h1>";
+            setTimeout(() => { window.location.href = "about:blank"; }, 1000);
+        }
+    }, 2000);
 
     window.onload = () => { renderPad(); initMap(); };
 </script>
