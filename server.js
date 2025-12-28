@@ -2,26 +2,40 @@ const express = require('express');
 const Gun = require('gun');
 const path = require('path');
 const cors = require('cors');
-const rateLimit = require('express-rate-limit'); // 🛡️ नई लाइब्रेरी
+const rateLimit = require('express-rate-limit');
+const geoip = require('geoip-lite'); // 🛡️ देश पहचानने के लिए
 
 const app = express();
 const port = process.env.PORT || 10000;
 
-// --- 🛡️ SECURITY LAYER: IP-BASED RATE LIMITER ---
+// --- 🚫 SECURITY CONFIG: BLACKLISTED COUNTRIES ---
+// उदाहरण के लिए: 'CN' (China), 'RU' (Russia), 'KP' (North Korea)
+const BANNED_COUNTRIES = ['CN', 'RU', 'KP']; 
+
+// --- 🛡️ MIDDLEWARE: COUNTRY BLOCKER ---
 // 
-const limiter = rateLimit({
-    windowMs: 15 * 60 * 1000, // 15 मिनट का समय
-    max: 100, // हर IP को 15 मिनट में अधिकतम 100 रिक्वेस्ट की अनुमति
-    message: "Too many requests from this IP, please try again after 15 minutes",
-    standardHeaders: true, // `RateLimit-*` हेडर्स वापस भेजें
-    legacyHeaders: false, // `X-RateLimit-*` हेडर्स बंद करें
+app.use((req, res, next) => {
+    const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+    const geo = geoip.lookup(ip);
+
+    if (geo && BANNED_COUNTRIES.includes(geo.country)) {
+        console.warn(`🚨 Blocked access attempt from Banned Country: ${geo.country} (IP: ${ip})`);
+        return res.status(403).send("<h1>403 Forbidden</h1>Access from your region is restricted by Sovereign Protocol.");
+    }
+    next();
 });
 
-// इसे सभी रूट्स पर लागू करें
+// --- 🛡️ SECURITY LAYER: IP-BASED RATE LIMITER ---
+const limiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 100, 
+    message: "Too many requests from this IP. Sovereign Shield active.",
+    standardHeaders: true,
+    legacyHeaders: false,
+});
+
 app.use(limiter);
 app.use(cors());
-
-// Static files (HTML, CSS, JS) को सर्व करें
 app.use(express.static(__dirname));
 
 // 🛡️ Explicit Routing
@@ -30,7 +44,7 @@ app.get('/citadel', (req, res) => res.sendFile(path.join(__dirname, 'citadel.htm
 app.get('/explorer', (req, res) => res.sendFile(path.join(__dirname, 'explorer.html')));
 
 const server = app.listen(port, () => {
-    console.log(`🚀 Sovereign Relay Live at Port ${port}`);
+    console.log(`🚀 Sovereign Relay Hardened & Online at Port ${port}`);
 });
 
 // ⛓️ Gun Mesh Configuration

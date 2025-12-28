@@ -10,6 +10,8 @@
   "dependencies": {
     "cors": "^2.8.5",
     "express": "^4.18.2",
+    "express-rate-limit": "^8.2.1",
+    "geoip-lite": "^1.4.10",
     "gun": "^0.2020.1241",
     "helmet": "^7.1.0"
   }
