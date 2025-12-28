@@ -1,139 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SOV Ultimate | Sovereign Lattice Network</title>
+    
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;500;700;800&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/gun/gun.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/gun/sea.js"></script>
+    
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <style>
+        :root {
+            --primary: #f7931a; --navy: #020617;
+            --text: #f8fafc; --text-muted: #94a3b8; --border: rgba(255,255,255,0.1);
+            --card-bg: rgba(15, 23, 42, 0.7); --success: #10b981;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; color: var(--text); background: var(--navy); overflow-x: hidden; }
+        .bg-glow { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(circle at 80% 20%, rgba(247,147,26,0.12) 0%, transparent 40%); z-index: -1; }
+        
+        nav { position: fixed; top: 0; width: 100%; padding: 1.5rem 8%; display: flex; justify-content: space-between; align-items: center; backdrop-filter: blur(20px); border-bottom: 1px solid var(--border); z-index: 1000; }
+        .logo { font-weight: 800; font-size: 1.4rem; color: var(--primary); display: flex; align-items: center; gap: 10px; text-decoration: none; cursor: pointer; }
+        .nav-links a { margin-left: 2rem; text-decoration: none; color: var(--text-muted); font-weight: 600; cursor: pointer; }
+        
+        .page-section { display: none; margin-top: 100px; padding: 2rem 8%; }
+        .page-section.active { display: block; animation: fadeIn 0.5s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        .hero { text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 80vh; }
+        .hero h1 { font-size: 4rem; font-weight: 800; margin-bottom: 1rem; }
+        .hero h1 span { color: var(--primary); }
+        
+        #node-map { height: 350px; width: 100%; max-width: 900px; border-radius: 30px; border: 1px solid var(--border); margin: 2rem 0; box-shadow: 0 20px 50px rgba(0,0,0,0.5); }
+        
+        .vault-card { max-width: 450px; margin: 0 auto; background: var(--card-bg); padding: 2.5rem; border-radius: 40px; border: 1px solid var(--border); text-align: center; }
+        .pin-display { font-size: 2.5rem; letter-spacing: 12px; color: var(--primary); font-family: 'Fira Code'; margin-bottom: 2rem; height: 50px; }
+        .pad-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+        .pad-btn { padding: 1rem; border-radius: 18px; border: 1px solid var(--border); background: rgba(255,255,255,0.05); color: white; font-weight: 700; cursor: pointer; }
+        .pad-btn:hover { background: var(--primary); }
+        
+        .btn-prime { background: var(--primary); color: white; padding: 0.8rem 2.5rem; border-radius: 50px; border: none; cursor: pointer; font-weight: 700; box-shadow: 0 10px 30px rgba(247, 147, 26, 0.3); }
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+
+<div class="bg-glow"></div>
+
 <nav>
     <a onclick="switchTab('home')" class="logo"><i class="bi bi-hexagon-fill"></i> SOV.NETWORK</a>
     <div class="nav-links">
-        <a id="link-home" onclick="switchTab('home')" class="active-link">Technology</a>
-        
-        <a href="explorer.html" target="_blank" id="link-explorer">Explorer</a>
-        
-        <a id="link-vault" onclick="switchTab('vault')" class="btn-prime" style="padding: 0.6rem 1.8rem; font-size: 0.85rem; color: white !important;">Access Vault</a>
+        <a onclick="switchTab('home')">Technology</a>
+        <a href="explorer.html" target="_blank">Lattice Explorer</a>
+        <a onclick="switchTab('vault')" class="btn-prime" style="color: white !important;">Access Vault</a>
     </div>
 </nav>
 
+<div id="section-home" class="page-section active">
+    <div class="hero">
+        <h1>Global <span>Lattice</span> Mesh Infrastructure.</h1>
+        <p style="color: var(--text-muted);">Real-time node handshakes across the sovereign map.</p>
+        <div id="node-map"></div>
+        <button onclick="switchTab('vault')" class="btn-prime">Initialize Node</button>
+    </div>
+</div>
+
+<div id="section-vault" class="page-section">
+    <div class="hero">
+        <div class="vault-card">
+            <h2>Initialize Sovereign Node</h2>
+            <div id="pin-login-container">
+                <div class="pin-display" id="pin-view">***</div>
+                <div class="pad-grid" id="pin-pad"></div>
+            </div>
+            <div id="v-status" style="margin-top:20px; font-size:10px; font-weight:800; color:var(--text-muted);">STANDBY</div>
+        </div>
+    </div>
+</div>
+
 <script>
     let currentInput = "";
-    let loginAttempts = 0;
-    let lockoutTime = 0;
-    const MAX_ATTEMPTS = 3;
-    const LOCKOUT_DURATION = 60000;
     const CORRECT_PIN = "123";
 
-    const vaultMsg = document.getElementById('vault-msg');
-    const pinView = document.getElementById('pin-view');
-    const vStatus = document.getElementById('v-status');
-    const isNewUser = !localStorage.getItem('sov_id_created');
+    function switchTab(tabId) {
+        document.querySelectorAll('.page-section').forEach(sec => sec.classList.remove('active'));
+        document.getElementById('section-' + tabId).classList.add('active');
+        if(tabId === 'home') setTimeout(initMap, 200);
+    }
 
-    // 🟢 UPDATE 2: Robust Handshake Logic
+    // 🟢 AUTH & REDIRECT FIX
     function successRedirect(msg) {
         localStorage.setItem('sov_id_created', 'true');
-        vStatus.innerText = msg;
-        vStatus.style.color = "var(--success)";
-        
-        // सीधे आपके Citadel Dashboard (citadel.html) पर रिडायरेक्ट
+        const status = document.getElementById('v-status');
+        status.innerText = msg;
+        status.style.color = "var(--success)";
         setTimeout(() => { 
             window.location.href = "citadel.html"; 
         }, 1000);
     }
 
-    // 🟢 UPDATE 3: Real Identity Bridge
-    async function loginWithIdentity() {
-        const input = document.getElementById('identity-input').value.trim();
-        if(!input) return;
-
-        vStatus.innerText = "VERIFYING REAL SHARD...";
-        vStatus.style.color = "var(--primary)";
-
-        try {
-            if(input.startsWith('{')) {
-                const parsed = JSON.parse(input);
-                if(parsed.pub) {
-                    localStorage.setItem('sov_vault_key', input);
-                    successRedirect("VAULT RESTORED");
-                } else throw new Error();
-            } else if(input.length > 30) {
-                localStorage.setItem('sov_last_did', input);
-                successRedirect("NODE RECOGNIZED");
-            } else {
-                throw new Error();
-            }
-        } catch(e) {
-            vStatus.innerText = "INVALID IDENTITY FORMAT";
-            vStatus.style.color = "var(--danger)";
-        }
-    }
-
-    // --- 📡 REAL MESH SYNC ---
-    const gun = Gun({
-        peers: [
-            'https://gun-manhattan.herokuapp.com/gun', 
-            'https://sov-relay.onrender.com/gun'
-        ]
-    });
-    
-    // Explorer Section में डेटा रेंडर करना
-    gun.get('sov_global_ledger').map().on((data, key) => {
-        if(!data || !data.sender) return;
-        const list = document.getElementById('explorer-list');
-        if(!list) return;
-        
-        const row = document.createElement('div');
-        row.className = 'tx-row';
-        row.innerHTML = `
-            <div>
-                <i class="bi bi-box-seam" style="color:var(--primary)"></i> 
-                <span>Shard: ${key.substring(0, 12)}...</span>
-            </div>
-            <div class="status-tag">VERIFIED</div>
-        `;
-        list.prepend(row);
-        if(list.children.length > 8) list.lastElementChild.remove();
-    });
-
-    // 🌍 WORLD MAP INITIALIZER Hook
-    function triggerMap() {
-        if(typeof initMap === "function") initMap();
-    }
-
     function renderPad() {
         const pad = document.getElementById('pin-pad');
-        if(!pad) return;
         pad.innerHTML = "";
-        const nums = [1,2,3,4,5,6,7,8,9,0].sort(() => Math.random() - 0.5);
-        nums.forEach(n => {
+        [1,2,3,4,5,6,7,8,9,0].forEach(n => {
             const btn = document.createElement('button');
             btn.className = 'pad-btn'; btn.innerText = n;
-            btn.onclick = () => handleInput(n);
+            btn.onclick = () => {
+                currentInput += n;
+                document.getElementById('pin-view').innerText = "*".repeat(currentInput.length);
+                if(currentInput === CORRECT_PIN) successRedirect("HANDSHAKE VERIFIED");
+                else if(currentInput.length >= 3) { 
+                    currentInput = ""; 
+                    document.getElementById('pin-view').innerText = "***"; 
+                }
+            };
             pad.appendChild(btn);
         });
     }
 
-    function handleInput(num) {
-        if (Date.now() < lockoutTime) {
-            const left = Math.ceil((lockoutTime - Date.now()) / 1000);
-            vStatus.innerText = `SECURITY LOCKOUT: ${left}s`;
-            return;
-        }
-        currentInput += num;
-        pinView.innerText = "*".repeat(currentInput.length);
-        if(currentInput.length === 3) {
-            if(currentInput === CORRECT_PIN) {
-                successRedirect("IDENTITY AUTHENTICATED");
-            } else {
-                loginAttempts++;
-                currentInput = ""; pinView.innerText = "***"; renderPad();
-                if (loginAttempts >= MAX_ATTEMPTS) {
-                    lockoutTime = Date.now() + LOCKOUT_DURATION;
-                    vStatus.innerText = "ACCESS BLOCKED"; vStatus.style.color = "var(--danger)";
-                } else {
-                    vStatus.innerText = `INVALID: ${MAX_ATTEMPTS - loginAttempts} RETRIES`;
-                    vStatus.style.color = "var(--danger)";
-                }
-            }
-        }
+    // 🌍 REAL LIVE WORLD MAP NODES
+    function initMap() {
+        const container = document.getElementById('node-map');
+        if (container._leaflet_id) return;
+        const map = L.map('node-map', { zoomControl: false }).setView([20, 0], 2);
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png').addTo(map);
+
+        const nodes = [[51.5, -0.09], [40.7, -74], [35.6, 139.6], [28.6, 77.2], [-33.8, 151.2], [19.07, 72.87]];
+        nodes.forEach(pos => {
+            L.circleMarker(pos, { color: '#f7931a', radius: 5, fillOpacity: 0.8 }).addTo(map)
+                .bindPopup("Mesh Node: ACTIVE");
+        });
     }
 
-    window.onload = () => { 
-        renderPad(); 
-        triggerMap();
-        if(vaultMsg) vaultMsg.innerText = isNewUser ? "Initialize Sovereign Node" : "Validator Handshake Required"; 
-    };
+    window.onload = () => { renderPad(); initMap(); };
 </script>
+</body>
+</html>
