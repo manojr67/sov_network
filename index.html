@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://unpkg.com 'unsafe-inline'; style-src 'self' https://cdn.jsdelivr.net https://fonts.googleapis.com 'unsafe-inline'; font-src 'self' https://fonts.gstatic.com https://cdn.jsdelivr.net; connect-src 'self' https://gun-manhattan.herokuapp.com/gun; img-src 'self' data:;">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://unpkg.com 'unsafe-inline'; style-src 'self' https://cdn.jsdelivr.net https://fonts.googleapis.com 'unsafe-inline'; font-src 'self' https://fonts.gstatic.com https://cdn.jsdelivr.net; connect-src 'self' https://gun-manhattan.herokuapp.com/gun https://sov-relay.onrender.com/gun; img-src 'self' data:;">
 
     <title>SOV Ultimate | Sovereign Lattice Network</title>
     
@@ -39,19 +39,19 @@
         .hero { min-height: 90vh; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 0 10%; margin-top: 50px; }
         .hero h1 { font-size: 5rem; font-weight: 800; letter-spacing: -3px; line-height: 0.9; margin-bottom: 2rem; }
         .hero h1 span { color: var(--primary); }
-        .hero p { font-size: 1.2rem; color: var(--text-muted); max-width: 750px; margin-bottom: 3rem; }
 
         .btn-prime { background: var(--primary); color: white; padding: 1rem 2.5rem; border-radius: 50px; font-weight: 700; transition: 0.4s; border: none; cursor: pointer; box-shadow: 0 10px 30px rgba(247, 147, 26, 0.3); }
 
-        .vault-card { max-width: 420px; margin: 0 auto; background: var(--card-bg); padding: 3rem; border-radius: 40px; border: 1px solid var(--border); box-shadow: 0 40px 100px rgba(0,0,0,0.5); text-align: center; }
+        .vault-card { max-width: 450px; margin: 0 auto; background: var(--card-bg); padding: 2.5rem; border-radius: 40px; border: 1px solid var(--border); box-shadow: 0 40px 100px rgba(0,0,0,0.5); text-align: center; }
         .pin-display { font-size: 2.5rem; letter-spacing: 12px; margin-bottom: 2rem; color: var(--primary); font-family: 'Fira Code'; height: 50px; }
-        .pad-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; }
-        .pad-btn { padding: 1.2rem; border-radius: 18px; border: 1px solid var(--border); background: rgba(255,255,255,0.05); color: white; font-weight: 700; cursor: pointer; transition: 0.2s; }
-        .pad-btn:hover { background: var(--primary); border-color: var(--primary); }
+        .pad-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+        .pad-btn { padding: 1rem; border-radius: 18px; border: 1px solid var(--border); background: rgba(255,255,255,0.05); color: white; font-weight: 700; cursor: pointer; }
+        .pad-btn:hover { background: var(--primary); }
 
-        .explorer-grid { display: grid; grid-template-columns: 1fr; gap: 12px; margin-top: 2rem; max-height: 450px; overflow-y: auto; padding-right: 10px; }
-        .tx-row { background: rgba(255,255,255,0.03); border: 1px solid var(--border); padding: 15px; border-radius: 15px; display: flex; justify-content: space-between; align-items: center; font-family: 'Fira Code', monospace; font-size: 0.8rem; animation: slideIn 0.4s ease-out; }
+        .tx-row { background: rgba(255,255,255,0.03); border: 1px solid var(--border); padding: 15px; border-radius: 15px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; font-family: 'Fira Code'; font-size: 0.8rem; }
         .status-tag { padding: 4px 10px; border-radius: 6px; font-size: 0.6rem; font-weight: 800; background: var(--success); color: white; }
+
+        .sov-textarea { width: 100%; height: 100px; font-size: 11px; padding: 15px; border-radius: 20px; border: 1px solid var(--border); background: rgba(0,0,0,0.4); color: var(--primary); font-family: 'Fira Code'; resize: none; margin-bottom: 15px; }
 
         .hidden { display: none !important; }
         footer { padding: 4rem 10%; border-top: 1px solid var(--border); text-align: center; color: var(--text-muted); font-size: 0.9rem; }
@@ -87,7 +87,7 @@
             <p style="color: var(--primary); font-weight: 800; font-size: 0.8rem; letter-spacing: 2px; margin-bottom: 1rem;">LIVE DATA STREAM</p>
             <h1 style="font-size: 3.5rem;">Lattice Explorer</h1>
             <div style="max-width: 900px; margin: 3rem auto; background: var(--card-bg); border: 1px solid var(--border); padding: 2.5rem; border-radius: 40px;">
-                <div id="explorer-list" class="explorer-grid"></div>
+                <div id="explorer-list"></div>
             </div>
         </div>
     </section>
@@ -97,15 +97,21 @@
     <section class="hero">
         <div class="vault-card">
             <h2 id="vault-msg">Initialize Sovereign Node</h2>
-            <div class="pin-display" id="pin-view">***</div>
-            <div class="pad-grid" id="pin-pad"></div>
-            <div id="v-status" style="color: var(--text-muted); font-size: 10px; font-weight: 800; margin-top: 20px; font-family: 'Fira Code';">STANDBY</div>
-            <hr style="margin: 2rem 0; border: 0; border-top: 1px solid var(--border);">
-            <button onclick="toggleKeyLogin()" style="background:none; border:none; color:var(--primary); font-size:12px; cursor:pointer; font-weight:800;"><i class="bi bi-key-fill"></i> Login with Vault Key</button>
-            <div id="key-login-box" class="hidden" style="margin-top:15px;">
-                <textarea id="vault-key-input" style="width:100%; height:80px; font-size:10px; padding:12px; border-radius:15px; border:1px solid var(--border); font-family:'Fira Code'; background:rgba(0,0,0,0.3); color:white; resize:none;" placeholder='Paste Secret JSON Key...'></textarea>
-                <button onclick="loginWithKey()" class="btn-prime" style="width:100%; margin-top:10px; border-radius:15px;">Restore Session</button>
+            
+            <div id="pin-login-container">
+                <div class="pin-display" id="pin-view">***</div>
+                <div class="pad-grid" id="pin-pad"></div>
+                <button onclick="toggleLoginMethod('key')" style="background:none; border:none; color:var(--primary); font-size:11px; cursor:pointer; font-weight:800; margin-top:20px;"><i class="bi bi-shield-lock-fill"></i> Login with Identity DID / JSON</button>
             </div>
+
+            <div id="key-login-container" class="hidden">
+                <p style="font-size: 11px; color: var(--text-muted); margin-bottom: 15px;">Paste your Sovereign DID address or Secret JSON Shard</p>
+                <textarea id="identity-input" class="sov-textarea" placeholder='{"pub": "...", "priv": "..."} OR DID Address'></textarea>
+                <button onclick="loginWithIdentity()" class="btn-prime" style="width:100%; border-radius:20px;">RESTORE NODE SESSION</button>
+                <button onclick="toggleLoginMethod('pin')" style="background:none; border:none; color:var(--text-muted); font-size:11px; cursor:pointer; font-weight:800; margin-top:20px;">Back to PIN Pad</button>
+            </div>
+
+            <div id="v-status" style="color: var(--text-muted); font-size: 10px; font-weight: 800; margin-top: 20px; font-family: 'Fira Code';">STANDBY</div>
         </div>
     </section>
 </div>
@@ -114,11 +120,10 @@
 
 <script>
     let currentInput = "";
-    // 2. 🛡️ FAILED ATTEMPT LOCKOUT & DYNAMIC OBFUSCATION
     let loginAttempts = 0;
     let lockoutTime = 0;
     const MAX_ATTEMPTS = 3;
-    const LOCKOUT_DURATION = 60000; // 1 मिनट लॉक
+    const LOCKOUT_DURATION = 60000;
     const CORRECT_PIN = "123";
 
     const vaultMsg = document.getElementById('vault-msg');
@@ -134,10 +139,16 @@
         if(activeLink) activeLink.classList.add('active-link');
     }
 
+    function toggleLoginMethod(method) {
+        const pinCont = document.getElementById('pin-login-container');
+        const keyCont = document.getElementById('key-login-container');
+        if(method === 'key') { pinCont.classList.add('hidden'); keyCont.classList.remove('hidden'); }
+        else { pinCont.classList.remove('hidden'); keyCont.classList.add('hidden'); }
+    }
+
     function renderPad() {
         const pad = document.getElementById('pin-pad');
         pad.innerHTML = "";
-        // रैंडमाइज्ड पैड शोल्डर-सर्फिंग और की-लॉगर्स को विफल करता है
         const nums = [1,2,3,4,5,6,7,8,9,0].sort(() => Math.random() - 0.5);
         nums.forEach(n => {
             const btn = document.createElement('button');
@@ -148,71 +159,80 @@
     }
 
     function handleInput(num) {
-        // लॉक चेक करें
-        const timeLeft = Math.ceil((lockoutTime - Date.now()) / 1000);
-        if (timeLeft > 0) {
-            vStatus.innerText = `SECURITY LOCKOUT: WAIT ${timeLeft}s`;
-            vStatus.style.color = "var(--danger)";
+        if (Date.now() < lockoutTime) {
+            const left = Math.ceil((lockoutTime - Date.now()) / 1000);
+            vStatus.innerText = `SECURITY LOCKOUT: ${left}s`;
             return;
         }
-
         currentInput += num;
         pinView.innerText = "*".repeat(currentInput.length);
-
-        // 3. ⚡ DYNAMIC LOGIC: पिन की लंबाई मुख्य वॉलेट के बराबर (3)
-        if(currentInput.length === CORRECT_PIN.length) {
+        if(currentInput.length === 3) {
             if(currentInput === CORRECT_PIN) {
-                localStorage.setItem('sov_id_created', 'true');
-                vStatus.innerText = "AUTHENTICATING IDENTITY...";
-                vStatus.style.color = "var(--primary)";
-                loginAttempts = 0;
-                setTimeout(() => { window.location.href = "/Mainnet"; }, 800);
+                successRedirect("IDENTITY AUTHENTICATED");
             } else {
                 loginAttempts++;
-                currentInput = "";
-                pinView.innerText = "***";
-                renderPad(); // दोबारा रैंडमाइज करें
-                
+                currentInput = ""; pinView.innerText = "***"; renderPad();
                 if (loginAttempts >= MAX_ATTEMPTS) {
                     lockoutTime = Date.now() + LOCKOUT_DURATION;
-                    vStatus.innerText = "SECURITY ALERT: ACCESS BLOCKED";
-                    vStatus.style.color = "var(--danger)";
+                    vStatus.innerText = "ACCESS BLOCKED"; vStatus.style.color = "var(--danger)";
                 } else {
-                    vStatus.innerText = `INVALID PIN: ${MAX_ATTEMPTS - loginAttempts} RETRIES LEFT`;
+                    vStatus.innerText = `INVALID: ${MAX_ATTEMPTS - loginAttempts} RETRIES`;
                     vStatus.style.color = "var(--danger)";
                 }
             }
         }
     }
 
-    function toggleKeyLogin() { document.getElementById('key-login-box').classList.toggle('hidden'); }
+    // --- 🆔 LOGIN WITH IDENTITY (DID / JSON) ---
+    async function loginWithIdentity() {
+        const input = document.getElementById('identity-input').value.trim();
+        if(!input) return;
 
-    async function loginWithKey() {
-        const keyData = document.getElementById('vault-key-input').value.trim();
+        vStatus.innerText = "VERIFYING SHARD...";
+        vStatus.style.color = "var(--primary)";
+
         try {
-            const parsed = JSON.parse(keyData);
-            if(parsed.pub && parsed.priv) {
-                localStorage.setItem('sov_vault_key', keyData);
-                localStorage.setItem('sov_id_created', 'true');
-                vStatus.innerText = "IDENTITY RESTORED";
-                setTimeout(() => window.location.href = "/Mainnet", 800);
+            // Check if it's JSON Vault
+            if(input.startsWith('{')) {
+                const parsed = JSON.parse(input);
+                if(parsed.pub) {
+                    localStorage.setItem('sov_vault_key', input);
+                    successRedirect("VAULT RESTORED");
+                } else throw new Error();
+            } 
+            // Check if it's DID Address (Public Key)
+            else if(input.length > 30) {
+                localStorage.setItem('sov_last_did', input);
+                successRedirect("NODE RECOGNIZED");
+            } else {
+                throw new Error();
             }
-        } catch(e) { vStatus.innerText = "INVALID SECRET VAULT SHARD"; vStatus.style.color = "var(--danger)"; }
+        } catch(e) {
+            vStatus.innerText = "INVALID IDENTITY FORMAT";
+            vStatus.style.color = "var(--danger)";
+        }
+    }
+
+    function successRedirect(msg) {
+        localStorage.setItem('sov_id_created', 'true');
+        vStatus.innerText = msg;
+        vStatus.style.color = "var(--success)";
+        setTimeout(() => { window.location.href = "/Mainnet"; }, 1000);
     }
 
     // EXPLORER ENGINE
-    const gun = Gun(['https://gun-manhattan.herokuapp.com/gun']);Gun(['https://sov-relay.onrender.com/gun']);
-    gun.get('sov_v70_wallets').map().on((data, key) => {
+    const gun = Gun(['https://gun-manhattan.herokuapp.com/gun', 'https://sov-relay.onrender.com/gun']);
+    gun.get('sov_v72_wallets').map().on((data, key) => {
         if(!data) return;
         const list = document.getElementById('explorer-list');
         const row = document.createElement('div');
         row.className = 'tx-row';
-        row.innerHTML = `<div><i class="bi bi-box-seam" style="color:var(--primary)"></i> <span>Block: ${key.substring(0, 10)}...</span></div><div class="status-tag">CONFIRMED</div>`;
+        row.innerHTML = `<div><i class="bi bi-box-seam" style="color:var(--primary)"></i> <span>Block: ${key.substring(0, 12)}...</span></div><div class="status-tag">VERIFIED</div>`;
         list.prepend(row);
-        if(list.children.length > 10) list.lastElementChild.remove();
+        if(list.children.length > 8) list.lastElementChild.remove();
     });
 
-    window.onload = () => { renderPad(); vaultMsg.innerText = isNewUser ? "Initialize Sovereign Node" : "Welcome Back, Validator"; };
+    window.onload = () => { renderPad(); vaultMsg.innerText = isNewUser ? "Initialize Sovereign Node" : "Validator Handshake Required"; };
 </script>
 </body>
 </html>
